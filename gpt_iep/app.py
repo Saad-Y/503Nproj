@@ -23,6 +23,28 @@ app = Flask(__name__)
 
 @app.route("/get_image_description", methods=['POST'])
 def get_image_description():
+    """
+    Analyzes one or more images using the GPT-4o vision model and returns a text-based description.
+
+    Expects:
+        A JSON payload with:
+        - "prompt" (str, optional): An instruction or question for GPT-4o to contextualize the image analysis.
+        - "images" (list of str): A list of base64-encoded JPEG images (without the data URL prefix).
+
+    Behavior:
+        - Builds a multi-modal request with the prompt and images.
+        - Sends the request to the OpenAI GPT-4o API.
+        - Extracts the model's textual response and returns it.
+
+    Returns:
+        - 200: {"response": "<GPT-4o generated description>"}
+        - 400: {"error": "No images provided"} if no image list is passed
+        - 500: {"error": "<exception message>"} if an error occurs during the API call
+
+    Notes:
+        - Images must be valid base64-encoded JPEGs.
+        - The OpenAI API key must be correctly configured via `openai.api_key`.
+    """
     try:
         data = request.get_json()
         prompt = data.get('prompt', '')
