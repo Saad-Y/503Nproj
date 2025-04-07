@@ -12,6 +12,9 @@ from PIL import Image
 from io import BytesIO
 from chromadb import HttpClient
 from datetime import datetime
+import os
+import PyPDF2
+from docx import Document
 
 GPT_IEP = 'localhost'
 EMBEDDINGS_IEP = 'localhost'
@@ -20,7 +23,7 @@ client = HttpClient(host='74.243.233.220', port=8000)
 
 document_upload_route = Blueprint('document_upload_routes', __name__)
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf' , 'docx', 'txt'}
 UPLOAD_FOLDER = ''
 
 def allowed_file_type(file_path):
@@ -54,17 +57,56 @@ def encode_document(file_path):
                    Returns an empty list if the file cannot be processed.
     """
     images_base64 = []
-
+    
     if file_path.lower().endswith(".pdf"):
         try:
+            # First try to extract text directly from PDF
+            pdf_text = ""
+            with open(file_path, 'rb') as pdf_file:
+                pdf_reader = PyPDF2.PdfReader(pdf_file)
+                for page_num in range(len(pdf_reader.pages)):
+                    page = pdf_reader.pages[page_num]
+                    pdf_text += page.extract_text() + "\n"
+            
+            # If we successfully extracted meaningful text, return it
+            if pdf_text.strip():
+                return pdf_text.strip()
+                
+            # If no text or extraction failed, fall back to image conversion
             images = convert_from_path(file_path, dpi=300)
             for img in images:
                 buffer = BytesIO()
                 img.save(buffer, format="JPEG")
                 images_base64.append(base64.b64encode(buffer.getvalue()).decode("utf-8"))
         except Exception as e:
-            logging.error(f"Failed to convert PDF to images: {e}")
+            logging.error(f"Failed to process PDF file: {e}")
             return []
+    elif file_path.lower().endswith(".docx"):
+        try:
+            document = Document(file_path)
+            text = "\n".join([para.text for para in document.paragraphs])
+            extracted_text = text.strip()
+            if not extracted_text:
+                raise ValueError("The uploaded DOCX is empty or contains no extractable text.")
+            return extracted_text
+        except Exception as e:
+            logging.error(f"Failed to process DOCX file: {e}")
+            return []
+        
+    elif file_path.lower().endswith(".txt"):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                text = f.read().strip()
+            if not text:
+                raise ValueError("The uploaded TXT file is empty.")
+            return text
+        except UnicodeDecodeError:
+            logging.error("The TXT file contains non-UTF-8 characters.")
+            return []
+        except Exception as e:
+            logging.error(f"Failed to process TXT file: {e}")
+            return []
+        
     else:
         try:
             img = Image.open(file_path)
