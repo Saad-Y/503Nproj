@@ -14,6 +14,7 @@ from chromadb import HttpClient
 from datetime import datetime
 from database.database import db
 from model.doc import Doc
+from auth_routes import token_required
 
 GPT_IEP = 'localhost'
 EMBEDDINGS_IEP = 'localhost'
@@ -85,9 +86,9 @@ def batch_images(images, batch_size=5):
     for i in range(0, len(images), batch_size):
         yield images[i:i + batch_size]
 
-    
 @document_upload_route.route("/upload_document", methods=["POST"])
-def upload_document():
+@token_required
+def upload_document(username):
     """
     Handles the upload, processing, and embedding of a document (PDF or image).
 
@@ -179,8 +180,7 @@ def upload_document():
 
     document = Document(page_content=processed_text)
     data = text_splitter.split_documents([document])
-
-    
+    collection = client.get_or_create_collection(name=username)
     for index, item in enumerate(data):
         entry_id = f"{file_path}-{index}"
         try:
@@ -190,7 +190,6 @@ def upload_document():
             )
             response.raise_for_status()
             embeddings =  response.json()["embedding"]
-            collection = client.get_or_create_collection(name="general")
             collection.add(
                 ids=[entry_id],
                 embeddings = [embeddings],
@@ -204,7 +203,7 @@ def upload_document():
             abort(502)
 
     try:
-        doc = Doc(owner_username='admin', title=file_path)
+        doc = Doc(owner_username=username, title=file_path)
         db.session.add(doc)
         db.session.commit()
     except Exception as e:

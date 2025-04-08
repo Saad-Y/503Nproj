@@ -8,6 +8,7 @@ from argon2 import PasswordHasher
 from argon2.low_level import Type
 from database.database import db
 from model.user import User
+from functools import wraps
 
 VAULT_URL = "https://vault503n.vault.azure.net/"
 credential = DefaultAzureCredential()
@@ -46,6 +47,22 @@ def extract_auth_token(authenticated_request):
 def decode_token(token): 
     payload = jwt.decode(token, SECRET_KEY, 'HS256') 
     return payload['sub'] 
+
+def token_required(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        token = request.cookies.get('learnify-token')
+        if not token:
+            logging.warning(f"Access to {f} Attempted without token")
+            abort(403)
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            username = data['sub']
+        except:
+            logging.warning(f"Access to {f} Attempted with bad token")
+            abort(403)
+        return f(username, *args, **kwargs)
+    return decorator
 
 @auth_routes.route('/login', methods=['POST'])
 def authenticate():
