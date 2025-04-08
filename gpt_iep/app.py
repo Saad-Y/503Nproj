@@ -5,6 +5,7 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 import base64
 import requests
+import logging
 
 VAULT_URL = "https://vault503n.vault.azure.net/"
 credential = DefaultAzureCredential()
@@ -88,6 +89,7 @@ def get_image_description():
         return jsonify({"response": reply})
 
     except Exception as e:
+        logging.error(e)
         return jsonify({"error": str(e)}), 500
 
 @app.route("/get_response", methods=['POST'])

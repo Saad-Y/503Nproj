@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from difflib import SequenceMatcher
 from chromadb import Client
@@ -9,6 +9,7 @@ import logging
 import requests
 
 GPT_IEP = 'localhost'
+EMBEDDINGS_IEP = 'localhost'
 
 quiz_routes = Blueprint("quiz_routes", __name__)
 
@@ -16,27 +17,27 @@ quiz_routes = Blueprint("quiz_routes", __name__)
 openai.api_key = "your-api-key"  # Use env var or config manager instead
 
 system_message = (
-      "You are an expert teacher. From the following text, generate multiple-choice questions covering all key ideas. "
-      "Each question should have:\n"
-      "- a 'question' field (string),\n"
-      "- an 'options' field (list of 4 strings), and\n"
-      "- an 'answer' field (integer, the index [0–3] of the correct option).\n\n"
-      "Respond **only** with a JSON array like this:\n"
-      "[\n"
-      "  {\n"
-      "    \"question\": \"What is X?\",\n"
-      "    \"options\": [\"A\", \"B\", \"C\", \"D\"],\n"
-      "    \"answer\": 2\n"
-      "  },\n"
-      "  ...\n"
-      "]"
+      'You are an expert teacher. From the following text, generate multiple-choice questions covering all key ideas. '
+      'Each question should have:'
+      '- a "question" field (string),'
+      '- an "options" field (list of 4 strings), and'
+      '- an "answer" field (integer, the index [0–3] of the correct option).'
+      'Respond **only** with a JSON array like this:'
+      '['
+      '  {'
+      '    "question": "What is X?",'
+      '    "options": ["A", "B", "C", "D"],'
+      '    "answer": 2'
+      '  },'
+      '  ...'
+      ']'
   )
 
 @quiz_routes.route("/generate_quiz", methods=["POST"])
 @token_required
 def generate_quiz(username):
     """
-    Generates a multiple-choice quiz based on the content of a specified document.
+    Generates a multiple-choice quiz based on the content of either a specified document or a specific topic.
 
     This endpoint retrieves all text chunks associated with the given document ID
     (stored under the user's ChromaDB collection), reconstructs the full document,
@@ -49,6 +50,9 @@ def generate_quiz(username):
     Expects:
         JSON payload with:
         - "document_id" (str): The ID of the document to generate a quiz for.
+        - "topic" (str): the topic to generate a quiz about
+        - EITHER document_id OR topic must be specified
+
 
     Returns:
         - 200 OK: 
@@ -60,17 +64,35 @@ def generate_quiz(username):
         - 502 Bad Gateway: If ChromaDB fails to fetch the document chunks or if an internal GPT call fails.
 
     """
+    global system_message
     data = request.get_json()
-    document_id = data.get("document_id")
+    document_id = data.get("document_id", '')
+    topic = data.get('topic', '')
 
-    if not username or not document_id:
+    if not username or (not document_id and not topic):
         return jsonify({"error": "Missing username or document_id"}), 400
+    if document_id and topic:
+        return jsonify({"error": "only specify one of 'document_id' and 'topic'"}), 400
 
     collection = client.get_collection(name=username)
 
     try:
-        results = collection.get(where={"original_doc": document_id})
-        chunks = results["documents"]
+        if document_id:
+            results = collection.get(where={"original_doc": document_id})
+            chunks = results["documents"]
+        else:
+            embeddings_response = requests.post(
+                f"http://{EMBEDDINGS_IEP}:3001/generate_embeddings",
+                json={"text": topic}
+            )
+            embeddings_response.raise_for_status()
+            embeddings =  embeddings_response.json()["embedding"]
+
+            results = collection.query(query_embeddings=[embeddings], n_results=15,  where={"id": {"$ne": "none"}})
+            system_message += f"The quiz should only be about concepts related to the following topic: {topic}. \n Ignore any context that is not related to this topic."
+            chunks = results["documents"][0]
+            
+        
     except Exception as e:
         return jsonify({"error": f"Failed to fetch chunks: {str(e)}"}), 502
     print(chunks)
@@ -100,7 +122,8 @@ def generate_quiz(username):
             quiz_text = response.json().get('response', '')
             quiz_sections.append(quiz_text)
         except Exception as e:
-            quiz_sections.append(f"[Error in chunk {i}: {str(e)}]")
+            logging.error("error in chunking: " + str(e))
+            abort(503)
 
     full_quiz = "\n\n".join(quiz_sections)
 
