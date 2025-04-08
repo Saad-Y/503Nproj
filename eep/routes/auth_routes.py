@@ -2,18 +2,14 @@ import logging
 from flask import request, abort, Blueprint, jsonify, make_response
 import jwt
 import datetime
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
 from argon2 import PasswordHasher
 from argon2.low_level import Type
 from database.database import db
 from model.user import User
 from functools import wraps
+import sys
+from secrets import SECRET_KEY
 
-VAULT_URL = "https://vault503n.vault.azure.net/"
-credential = DefaultAzureCredential()
-client = SecretClient(vault_url=VAULT_URL, credential=credential)
-SECRET_KEY = client.get_secret('SECRET-KEY').value
 
 auth_routes = Blueprint('auth_routes', __name__)
 
