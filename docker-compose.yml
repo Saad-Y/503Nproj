@@ -1,7 +1,7 @@
 version: '3.8'
 services:
 
-  inventory:
+  embeddings:
     build:
       context: ./embeddings_iep
 
@@ -10,6 +10,27 @@ services:
       - my_network
     ports:
       - "3001:3001"
+
+  gpt:
+    build:
+      context: ./gpt_iep
+
+    container_name: gpt_iep
+    networks:
+      - my_network
+    ports:
+      - "3002:3002"
+
+  eep:
+    build:
+      context: ./eep
+
+    container_name: eep
+    networks:
+      - my_network
+    ports:
+      - "3000:3000"
+  
 
 networks:
   my_network:
