@@ -181,6 +181,15 @@ def upload_document(username):
     document = Document(page_content=processed_text)
     data = text_splitter.split_documents([document])
     collection = client.get_or_create_collection(name=username)
+    try:
+        doc = Doc(owner_username=username, title=file_path)
+        db.session.add(doc)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logging.error("error while inserting doc record in SQL DB: "+str(e))
+        abort(502)
+
     for index, item in enumerate(data):
         entry_id = f"{file_path}-{index}"
         try:
@@ -194,7 +203,7 @@ def upload_document(username):
                 ids=[entry_id],
                 embeddings = [embeddings],
                 documents=[item.page_content],
-                metadatas=[{"date_added": datetime.now().isoformat(), "original_doc": file_path}]
+                metadatas=[{"date_added": datetime.now().isoformat(), "original_doc": doc.id}]
             )
 
         except Exception as e:
@@ -202,12 +211,4 @@ def upload_document(username):
             print(f"Failed to get/store embedding: {e}")
             abort(502)
 
-    try:
-        doc = Doc(owner_username=username, title=file_path)
-        db.session.add(doc)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        logging.error("error while inserting doc record in SQL DB: "+str(e))
-                
     return "", 200
