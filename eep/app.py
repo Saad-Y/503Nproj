@@ -32,6 +32,7 @@ db.init_app(app)
 
 with app.app_context():
     from model.user import User
+    from model.doc import Doc
 
     if app.config["SQLALCHEMY_DATABASE_URI"]:
         db.create_all()

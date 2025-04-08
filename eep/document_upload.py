@@ -12,6 +12,8 @@ from PIL import Image
 from io import BytesIO
 from chromadb import HttpClient
 from datetime import datetime
+from database.database import db
+from model.doc import Doc
 
 GPT_IEP = 'localhost'
 EMBEDDINGS_IEP = 'localhost'
@@ -200,5 +202,13 @@ def upload_document():
             # Log or handle error
             print(f"Failed to get/store embedding: {e}")
             abort(502)
-        
+
+    try:
+        doc = Doc(owner_username='admin', title=file_path)
+        db.session.add(doc)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logging.error("error while inserting doc record in SQL DB: "+str(e))
+                
     return "", 200
