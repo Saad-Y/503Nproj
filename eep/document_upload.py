@@ -193,7 +193,7 @@ def upload_document():
                 ids=[entry_id],
                 embeddings = [embeddings],
                 documents=[item.page_content],
-                metadatas=[{"date_added": datetime.now().isoformat()}]
+                metadatas=[{"date_added": datetime.now().isoformat(), "original_doc": file_path}]
             )
 
         except Exception as e:
