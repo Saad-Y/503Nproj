@@ -4,6 +4,7 @@ import openai
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from document_upload import document_upload_route
+from auth_routes import auth_routes
 from database.database import db
 import os
 
@@ -15,6 +16,7 @@ openai.api_key = client.get_secret('OPENAI-API-KEY').value
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.register_blueprint(document_upload_route)
+app.register_blueprint(auth_routes)
 
 # Connect to db
 mysql_password = client.get_secret("DB-PASSWORD").value
