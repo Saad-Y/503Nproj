@@ -1,5 +1,6 @@
 speech.mp3
 eep/tst.py
+tmp/DigiCertGlobalRootCA.crt.pem
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
