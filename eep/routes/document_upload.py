@@ -10,16 +10,14 @@ import requests
 from pdf2image import convert_from_path
 from PIL import Image
 from io import BytesIO
-from chromadb import HttpClient
 from datetime import datetime
 from database.database import db
 from model.doc import Doc
 from routes.auth_routes import token_required
+from database.vectordb import client
 
 GPT_IEP = 'localhost'
 EMBEDDINGS_IEP = 'localhost'
-
-client = HttpClient(host='74.243.233.220', port=8000)
 
 document_upload_route = Blueprint('document_upload_routes', __name__)
 
