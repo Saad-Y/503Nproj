@@ -3,6 +3,7 @@ from flask_cors import CORS
 import openai
 from routes.document_upload import document_upload_route
 from routes.auth_routes import auth_routes
+from routes.quiz_generation import quiz_routes
 from database.database import db
 import os
 from secrets import OPENAI_API_KEY, mysql_password, ssl_cert
@@ -13,6 +14,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
+app.register_blueprint(quiz_routes)
 
 # Connect to db
 cert = "-----BEGIN CERTIFICATE-----\n" + '\n'.join([ssl_cert[i:i+64] for i in range(0, len(ssl_cert), 64)]) + "\n-----END CERTIFICATE-----"

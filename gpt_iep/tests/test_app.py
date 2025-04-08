@@ -106,3 +106,67 @@ def test_get_image_description_multiple_images(client):
         assert len(json_data["response"]) > 0
     else:
         assert "error" in json_data
+
+import json
+import pytest
+
+@pytest.fixture
+def client():
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
+
+def test_get_response_valid(client):
+    payload = {
+        "system_message": "You are a helpful assistant.",
+        "context": "What is the capital of France?"
+    }
+
+    response = client.post("/get_response", data=json.dumps(payload), content_type="application/json")
+
+    assert response.status_code in [200, 500]
+
+    if response.status_code == 200:
+        data = response.get_json()
+        assert "response" in data
+        assert isinstance(data["response"], str)
+
+    elif response.status_code == 500:
+        data = response.get_json()
+        assert "error" in data
+
+def test_get_response_missing_system_message(client):
+    payload = {
+        "context": "This is a context-only input."
+    }
+
+    response = client.post("/get_response", data=json.dumps(payload), content_type="application/json")
+    assert response.status_code == 400
+    assert "error" in response.get_json()
+
+def test_get_response_missing_context(client):
+    payload = {
+        "system_message": "System message only."
+    }
+
+    response = client.post("/get_response", data=json.dumps(payload), content_type="application/json")
+    assert response.status_code == 400
+    assert "error" in response.get_json()
+
+def test_get_response_empty_payload(client):
+    response = client.post("/get_response", data="", content_type="application/json")
+    assert response.status_code in [400, 500]  # 400 for invalid payload, 500 if .get_json() fails
+
+def test_get_response_invalid_json(client):
+    response = client.post("/get_response", data="not-a-valid-json", content_type="application/json")
+    assert response.status_code in [400, 500]
+
+def test_get_response_empty_values(client):
+    payload = {
+        "system_message": "",
+        "context": ""
+    }
+
+    response = client.post("/get_response", data=json.dumps(payload), content_type="application/json")
+    assert response.status_code == 400
+    assert "error" in response.get_json()
