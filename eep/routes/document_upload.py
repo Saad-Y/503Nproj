@@ -14,7 +14,7 @@ from chromadb import HttpClient
 from datetime import datetime
 from database.database import db
 from model.doc import Doc
-from auth_routes import token_required
+from routes.auth_routes import token_required
 
 GPT_IEP = 'localhost'
 EMBEDDINGS_IEP = 'localhost'

@@ -3,8 +3,8 @@ from flask_cors import CORS
 import openai
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from document_upload import document_upload_route
-from auth_routes import auth_routes
+from routes.document_upload import document_upload_route
+from routes.auth_routes import auth_routes
 from database.database import db
 import os
 
