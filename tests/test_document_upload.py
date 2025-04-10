@@ -12,7 +12,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Now import from the module
-from eep.document_upload import encode_document
+from eep.routes.document_upload import encode_document
 
 class TestDocumentUpload(unittest.TestCase):
     
@@ -48,7 +48,7 @@ class TestDocumentUpload(unittest.TestCase):
                 
         return file_path
 
-    @patch('eep.document_upload.PyPDF2.PdfReader')
+    @patch('eep.routes.document_upload.PyPDF2.PdfReader')
     def test_pdf_text_extraction(self, mock_pdf_reader):
         """Test that PDF text extraction works correctly"""
         # Setup mock PDF reader
@@ -67,8 +67,8 @@ class TestDocumentUpload(unittest.TestCase):
         self.assertEqual(result, "This is a test PDF content")
         mock_page.extract_text.assert_called_once()
     
-    @patch('eep.document_upload.PyPDF2.PdfReader')
-    @patch('document_upload.convert_from_path')
+    @patch('eep.routes.document_upload.PyPDF2.PdfReader')
+    @patch('eep.routes.document_upload.convert_from_path')
     def test_pdf_fallback_to_images(self, mock_convert, mock_pdf_reader):
         """Test PDF processing falls back to image conversion when text extraction fails"""
         # Setup mock PDF reader to return empty text
@@ -83,8 +83,8 @@ class TestDocumentUpload(unittest.TestCase):
         mock_convert.return_value = [mock_img]
         
         # Mock BytesIO and base64 encode
-        with patch('document_upload.BytesIO', return_value=mock_buffer), \
-             patch('document_upload.base64.b64encode', return_value=b'test_encoded'), \
+        with patch('eep.routes.document_upload.BytesIO', return_value=mock_buffer), \
+             patch('eep.routes.document_upload.base64.b64encode', return_value=b'test_encoded'), \
              patch('builtins.open', mock_open()):
             
             test_file = self.create_test_file("", "pdf")
@@ -104,7 +104,7 @@ class TestDocumentUpload(unittest.TestCase):
         # Assert that the result is the text content
         self.assertEqual(result, test_content)
     
-    @patch('document_upload.Document')
+    @patch('eep.routes.document_upload.Document')
     def test_docx_extraction(self, mock_document):
         """Test that DOCX content is extracted correctly"""
         # Setup mock document with paragraphs
@@ -125,7 +125,7 @@ class TestDocumentUpload(unittest.TestCase):
         self.assertEqual(result, "This is paragraph 1\nThis is paragraph 2")
         mock_document.assert_called_once_with(test_file)
     
-    @patch('document_upload.Image.open')
+    @patch('eep.routes.document_upload.Image.open')
     def test_image_processing(self, mock_image_open):
         """Test that image files are processed correctly"""
         # Setup mock image
@@ -138,8 +138,8 @@ class TestDocumentUpload(unittest.TestCase):
         test_file = os.path.join(self.test_dir, "test_image.jpg")
         
         # Mock BytesIO and base64 encode
-        with patch('document_upload.BytesIO', return_value=mock_buffer), \
-             patch('document_upload.base64.b64encode', return_value=b'test_encoded'):
+        with patch('eep.routes.document_upload.BytesIO', return_value=mock_buffer), \
+             patch('eep.routes.document_upload.base64.b64encode', return_value=b'test_encoded'):
             
             result = encode_document(test_file)
         

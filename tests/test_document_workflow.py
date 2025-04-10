@@ -8,7 +8,7 @@ from flask import Flask
 # Add parent directory to path to import the document_upload module
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'eep'))
 
-from document_upload import document_upload_route, allowed_file, allowed_file_type, encode_document
+from eep.routes.document_upload import document_upload_route, allowed_file, allowed_file_type, encode_document
 
 class TestDocumentWorkflow(unittest.TestCase):
     
@@ -38,7 +38,7 @@ class TestDocumentWorkflow(unittest.TestCase):
         self.assertFalse(allowed_file('test.zip'))
         self.assertFalse(allowed_file('testnoextension'))
     
-    @patch('document_upload.magic.Magic')
+    @patch('eep.routes.document_upload.magic.Magic')
     def test_allowed_file_type(self, mock_magic):
         """Test the allowed_file_type function for various MIME types"""
         # Setup mock magic to return different MIME types
@@ -54,12 +54,12 @@ class TestDocumentWorkflow(unittest.TestCase):
         mock_mime.from_file.return_value = 'application/x-executable'
         self.assertFalse(allowed_file_type('test_file'))
     
-    @patch('document_upload.request')
-    @patch('document_upload.allowed_file')
-    @patch('document_upload.allowed_file_type')
-    @patch('document_upload.encode_document')
-    @patch('document_upload.requests.post')
-    @patch('document_upload.client.get_or_create_collection')
+    @patch('eep.routes.document_upload.request')
+    @patch('eep.routes.document_upload.allowed_file')
+    @patch('eep.routes.document_upload.allowed_file_type')
+    @patch('eep.routes.document_upload.encode_document')
+    @patch('eep.routes.document_upload.requests.post')
+    @patch('eep.routes.document_upload.client.get_or_create_collection')
     def test_upload_document_text_file(self, mock_collection, mock_post, mock_encode, 
                                        mock_allowed_type, mock_allowed_file, mock_request):
         """Test the upload_document route with a text file (PDF/DOCX/TXT)"""
@@ -87,7 +87,7 @@ class TestDocumentWorkflow(unittest.TestCase):
         with self.app.test_request_context('/upload_document', method='POST'):
             # Need to patch os.remove to prevent actual file deletion
             with patch('os.remove'):
-                from document_upload import upload_document
+                from eep.routes.document_upload import upload_document
                 with patch('flask.abort') as mock_abort:
                     # Execute the function
                     upload_document()
@@ -98,13 +98,13 @@ class TestDocumentWorkflow(unittest.TestCase):
         # Verify the collection add was called
         mock_collection_obj.add.assert_called()
     
-    @patch('document_upload.batch_images')
-    @patch('document_upload.request')
-    @patch('document_upload.allowed_file')
-    @patch('document_upload.allowed_file_type')
-    @patch('document_upload.encode_document')
-    @patch('document_upload.requests.post')
-    @patch('document_upload.client.get_or_create_collection')
+    @patch('eep.routes.document_upload.batch_images')
+    @patch('eep.routes.document_upload.request')
+    @patch('eep.routes.document_upload.allowed_file')
+    @patch('eep.routes.document_upload.allowed_file_type')
+    @patch('eep.routes.document_upload.encode_document')
+    @patch('eep.routes.document_upload.requests.post')
+    @patch('eep.routes.document_upload.client.get_or_create_collection')
     def test_upload_document_image_file(self, mock_collection, mock_post, mock_encode, 
                                         mock_allowed_type, mock_allowed_file, 
                                         mock_request, mock_batch):
@@ -148,7 +148,7 @@ class TestDocumentWorkflow(unittest.TestCase):
         with self.app.test_request_context('/upload_document', method='POST'):
             # Need to patch os.remove to prevent actual file deletion
             with patch('os.remove'):
-                from document_upload import upload_document
+                from eep.routes.document_upload import upload_document
                 with patch('flask.abort') as mock_abort:
                     # Execute the function
                     upload_document()

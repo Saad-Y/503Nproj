@@ -14,10 +14,10 @@ from datetime import datetime
 import os
 import PyPDF2
 from docx import Document
-from database.database import db
-from model.doc import Doc
-from routes.auth_routes import token_required
-from database.vectordb import client
+from eep.database.database import db
+from eep.model.doc import Doc
+from eep.routes.auth_routes import token_required
+from eep.database.vectordb import client
 
 GPT_IEP = 'localhost'
 EMBEDDINGS_IEP = 'localhost'
