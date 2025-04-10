@@ -4,11 +4,11 @@ import jwt
 import datetime
 from argon2 import PasswordHasher
 from argon2.low_level import Type
-from database.database import db
-from model.user import User
+from eep.database.database import db
+from eep.model.user import User
 from functools import wraps
 import sys
-from secrets import SECRET_KEY
+from eep.secrets import SECRET_KEY
 
 
 auth_routes = Blueprint('auth_routes', __name__)
