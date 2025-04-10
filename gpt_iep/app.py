@@ -5,6 +5,7 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 import base64
 import requests
+import logging
 
 VAULT_URL = "https://vault503n.vault.azure.net/"
 credential = DefaultAzureCredential()
@@ -88,9 +89,60 @@ def get_image_description():
         return jsonify({"response": reply})
 
     except Exception as e:
+        logging.error(e)
         return jsonify({"error": str(e)}), 500
 
+@app.route("/get_response", methods=['POST'])
+def get_response():
+    """
+   returns a response to a prompt.
 
+    Expects:
+        A JSON payload with:
+        - "system_message" (str).
+        - "context" (str).
+
+    Returns:
+        - 200: {"response": "<GPT-4o generated response>"}
+        - 400: if no prompt is passed
+        - 500: {"error": "<exception message>"} if an error occurs during the API call
+
+    """
+    try:
+        data = request.get_json()
+        system_message = data.get('system_message', '')
+        context = data.get('context', '')
+
+        if not context or not system_message:
+            return jsonify({"error": "No prompt provided"}), 400
+
+
+        # OpenAI API call
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {openai.api_key}"
+        }
+
+        payload = {
+            "model": "gpt-4o",
+            "messages": [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": context}
+            ],
+        }
+
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json=payload
+        )
+        response.raise_for_status()
+
+        reply = response.json()['choices'][0]['message']['content']
+        return jsonify({"response": reply})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=3002)

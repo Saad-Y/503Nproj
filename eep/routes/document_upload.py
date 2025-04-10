@@ -10,16 +10,17 @@ import requests
 from pdf2image import convert_from_path
 from PIL import Image
 from io import BytesIO
-from chromadb import HttpClient
 from datetime import datetime
 import os
 import PyPDF2
 from docx import Document
+from database.database import db
+from model.doc import Doc
+from routes.auth_routes import token_required
+from database.vectordb import client
 
 GPT_IEP = 'localhost'
 EMBEDDINGS_IEP = 'localhost'
-
-client = HttpClient(host='74.243.233.220', port=8000)
 
 document_upload_route = Blueprint('document_upload_routes', __name__)
 
@@ -125,9 +126,9 @@ def batch_images(images, batch_size=5):
     for i in range(0, len(images), batch_size):
         yield images[i:i + batch_size]
 
-    
 @document_upload_route.route("/upload_document", methods=["POST"])
-def upload_document():
+@token_required
+def upload_document(username):
     """
     Handles the upload, processing, and embedding of a document (PDF or image).
 
@@ -219,8 +220,16 @@ def upload_document():
 
     document = Document(page_content=processed_text)
     data = text_splitter.split_documents([document])
+    collection = client.get_or_create_collection(name=username)
+    try:
+        doc = Doc(owner_username=username, title=file_path)
+        db.session.add(doc)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logging.error("error while inserting doc record in SQL DB: "+str(e))
+        abort(502)
 
-    
     for index, item in enumerate(data):
         entry_id = f"{file_path}-{index}"
         try:
@@ -230,17 +239,16 @@ def upload_document():
             )
             response.raise_for_status()
             embeddings =  response.json()["embedding"]
-            collection = client.get_or_create_collection(name="general")
             collection.add(
                 ids=[entry_id],
                 embeddings = [embeddings],
                 documents=[item.page_content],
-                metadatas=[{"date_added": datetime.now().isoformat()}]
+                metadatas=[{"date_added": datetime.now().isoformat(), "original_doc": doc.id}]
             )
 
         except Exception as e:
             # Log or handle error
             print(f"Failed to get/store embedding: {e}")
             abort(502)
-        
+
     return "", 200
