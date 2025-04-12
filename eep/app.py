@@ -11,7 +11,7 @@ from secrets import OPENAI_API_KEY, mysql_password, ssl_cert
 openai.api_key = OPENAI_API_KEY
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
 app.register_blueprint(quiz_routes)

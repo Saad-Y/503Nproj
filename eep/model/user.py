@@ -1,4 +1,4 @@
-from eep.database.database import db
+from database.database import db
 
 class User(db.Model):
     __tablename__ = 'user'

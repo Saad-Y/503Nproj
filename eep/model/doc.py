@@ -1,4 +1,4 @@
-from eep.database.database import db
+from database.database import db
 
 class Doc(db.Model):
     __tablename__ = 'document'

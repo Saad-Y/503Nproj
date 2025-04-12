@@ -4,11 +4,11 @@ import jwt
 import datetime
 from argon2 import PasswordHasher
 from argon2.low_level import Type
-from eep.database.database import db
-from eep.model.user import User
+from database.database import db
+from model.user import User
 from functools import wraps
 import sys
-from eep.secrets import SECRET_KEY
+from secrets import SECRET_KEY
 
 
 auth_routes = Blueprint('auth_routes', __name__)
@@ -49,7 +49,6 @@ def token_required(f):
     def decorator(*args, **kwargs):
         token = request.cookies.get('learnify-token')
         if not token:
-            logging.warning(f"Access to {f} Attempted without token")
             abort(403)
         try:
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -59,6 +58,12 @@ def token_required(f):
             abort(403)
         return f(username, *args, **kwargs)
     return decorator
+
+@auth_routes.route('/auth_check', methods=['GET'])
+@token_required
+def auth_check(username):
+    return jsonify({"message": "Token valid", "user": username}), 200
+
 
 @auth_routes.route('/login', methods=['POST'])
 def authenticate():
