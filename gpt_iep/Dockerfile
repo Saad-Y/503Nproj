@@ -12,8 +12,8 @@ RUN pip install -r requirements.txt
 # Copy the current directory contents into the container
 COPY . .
 
-# Expose port 3001
-EXPOSE 3002
+# Expose port 5002
+EXPOSE 5002
 
 # Command to run the application
 CMD ["python3", "app.py"]

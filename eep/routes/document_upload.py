@@ -194,7 +194,7 @@ def upload_document(username):
     for batch in batch_images(images_base64, batch_size=5):
         try:
             response = requests.post(
-                f"http://{GPT_IEP}:3002/get_image_description",
+                f"http://{GPT_IEP}:5002/get_image_description",
                 json={
                     "prompt": prompt,
                     "images": batch
@@ -234,7 +234,7 @@ def upload_document(username):
         entry_id = f"{file_path}-{index}"
         try:
             response = requests.post(
-                f"http://{EMBEDDINGS_IEP}:3001/generate_embeddings",
+                f"http://{EMBEDDINGS_IEP}:5001/generate_embeddings",
                 json={"text": item.page_content}
             )
             response.raise_for_status()

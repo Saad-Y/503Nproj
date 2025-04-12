@@ -82,7 +82,7 @@ def generate_quiz(username):
             chunks = results["documents"]
         else:
             embeddings_response = requests.post(
-                f"http://{EMBEDDINGS_IEP}:3001/generate_embeddings",
+                f"http://{EMBEDDINGS_IEP}:5001/generate_embeddings",
                 json={"text": topic}
             )
             embeddings_response.raise_for_status()
@@ -112,7 +112,7 @@ def generate_quiz(username):
     for i, section in enumerate(sub_chunks):
         try:
             response = requests.post(
-                f"http://{GPT_IEP}:3002/get_response",
+                f"http://{GPT_IEP}:5002/get_response",
                 json={
                     "system_message": system_message,
                     "context": section

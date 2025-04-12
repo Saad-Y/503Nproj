@@ -9,7 +9,7 @@ services:
     networks:
       - my_network
     ports:
-      - "3001:3001"
+      - "5001:5001"
 
   gpt:
     build:
@@ -19,7 +19,7 @@ services:
     networks:
       - my_network
     ports:
-      - "3002:3002"
+      - "5002:5002"
 
   eep:
     build:
@@ -29,7 +29,7 @@ services:
     networks:
       - my_network
     ports:
-      - "3000:3000"
+      - "5000:5000"
   
 
 networks:
