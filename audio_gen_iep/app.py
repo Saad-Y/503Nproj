@@ -3,11 +3,20 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 from openai import OpenAI
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+
 
 load_dotenv()
 app = Flask(__name__)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+VAULT_URL = "https://vault503n.vault.azure.net/"
+credential = DefaultAzureCredential()
+client = SecretClient(vault_url=VAULT_URL, credential=credential)
+OPENAI_API_KEY = client.get_secret('OPENAI-API-KEY').value
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 @app.route('/synthesize', methods=['GET'])
 def synthesize():
@@ -41,4 +50,4 @@ def synthesize():
     )
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=3003)

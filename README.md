@@ -9,3 +9,7 @@ pytest -q embeddings_iep/tests/test_app.py
 ```
 pytest -q gpt_iep/tests/test_app.py
 ```
+3. Test audio_gen_iep
+```
+pytest -q audio_gen_iep/tests/test_app.py
+```
