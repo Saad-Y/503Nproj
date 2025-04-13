@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function GenerateQuizFromDoc({ SERVER_URL }) {
   const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState("");
   const [selectedDocId, setSelectedDocId] = useState(null);
   const [quiz, setQuiz] = useState(null);
   const navigate = useNavigate();
@@ -26,19 +26,18 @@ export default function GenerateQuizFromDoc({ SERVER_URL }) {
       .then((res) => res.json())
       .then((data) => {
         setDocuments(data);
-        setLoading(false);
+        setLoading("");
       })
       .catch((err) => {
         console.error('Failed to fetch documents', err);
-        setLoading(false);
+        setLoading("An error occured.");
       });
   }, [SERVER_URL]);
 
   // Handle quiz generation
   const handleGenerateQuiz = (docId) => {
     setSelectedDocId(docId);
-    
-
+    setLoading("Loading...");
     fetch(`${SERVER_URL}/generate_quiz`, {
       method: 'POST',
       credentials: 'include',
@@ -49,7 +48,15 @@ export default function GenerateQuizFromDoc({ SERVER_URL }) {
     })
       .then((res) => res.json())
       .then((data) => {
-        const quizArray = typeof data.quiz === 'string' ? JSON.parse(data.quiz) : data.quiz;
+        setLoading("");
+        let rawQuiz = data.quiz;
+
+        // Remove markdown code fencing if it exists
+        if (typeof rawQuiz === 'string' && rawQuiz.startsWith('```')) {
+        rawQuiz = rawQuiz.replace(/```(?:json)?\n?/, '').replace(/```$/, '');
+        }
+
+        const quizArray = JSON.parse(rawQuiz);
         navigate('/quiz', { state: { quiz: quizArray } });
       })
       .catch((err) => {
@@ -58,13 +65,16 @@ export default function GenerateQuizFromDoc({ SERVER_URL }) {
   };
 
   return (
-    <Box p={4}>
+    <Box p={4} className="dashboard-bg">
       <Typography variant="h4" mb={3}>
         📄 Select a Document to Generate Quiz
       </Typography>
+      <Typography variant="body2" align="center" sx={{ mt: 2, marginBottom:2}}>
+          {loading}
+    </Typography>
 
       {loading ? (
-        <CircularProgress />
+        <></>
       ) : (
         <Grid container spacing={2}>
           {documents.map((doc) => (

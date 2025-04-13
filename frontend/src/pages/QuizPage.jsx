@@ -18,6 +18,7 @@ export default function QuizPage() {
   const quiz = location.state?.quiz;
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState("");
   if (!quiz) {
     return (
       <Box p={4}>
@@ -62,7 +63,7 @@ export default function QuizPage() {
   console.log("Type of quiz:", typeof quiz);
   console.log(quiz);
   return (
-    <Box p={4}>
+    <Box p={4} className="dashboard-bg">
       <Typography variant="h4" mb={4}>
         🧠 Your Quiz
       </Typography>

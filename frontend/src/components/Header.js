@@ -23,7 +23,7 @@ export default function Header({ isAuthenticated, onLogout, SERVER_URL }) {
   return (
     <AppBar position="static" className="gradient-header">
       <Toolbar className="toolbar-content"> 
-        <Typography variant="h5" className="logo">
+        <Typography variant="h5" className="logo" onClick={() => {navigate('/');}}>
           Learnify AI
         </Typography>
         {isAuthenticated && (

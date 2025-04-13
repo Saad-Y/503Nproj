@@ -8,11 +8,12 @@ import {
   Grid,
   ToggleButton,
   ToggleButtonGroup,
-  Stack,
+  Stack
 } from '@mui/material';
 import { Upload } from 'lucide-react';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
+import TopicDialog from '../components/TopicDialog'
 
 export default function Dashboard({ SERVER_URL }) {
   const [recommendations, setRecommendations] = useState([
@@ -21,6 +22,9 @@ export default function Dashboard({ SERVER_URL }) {
     { title: 'Quiz: AI Ethics Basics', type: 'quiz' },
   ]);
   const navigate = useNavigate();
+  const [topicOpen, setTopicOpen] = useState(false);
+  const [topic, setTopic] = useState('');
+
 
   return (
     <Box p={3} className="dashboard-bg">
@@ -60,7 +64,7 @@ export default function Dashboard({ SERVER_URL }) {
                 <Button variant="outlined" onClick={() => navigate('/generate-quiz-from-doc')}>
                     From Document
                   </Button>
-                  <Button variant="outlined" color="primary" fullWidth>
+                  <Button variant="outlined"  onClick={() => setTopicOpen(true)}>
                     From Topic
                   </Button>
                 </Stack>
@@ -119,6 +123,7 @@ export default function Dashboard({ SERVER_URL }) {
           </Card>
         </Grid>
       </Grid>
+      <TopicDialog setTopic={setTopic} topic={topic} navigate={navigate} setTopicOpen={setTopicOpen} topicOpen={topicOpen} SERVER_URL={SERVER_URL}/>
     </Box>
   );
 }
