@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { Upload } from 'lucide-react';
 import './Dashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard({ SERVER_URL }) {
   const [recommendations, setRecommendations] = useState([
@@ -19,6 +20,7 @@ export default function Dashboard({ SERVER_URL }) {
     { title: 'Review Notes: Data Structures', type: 'notes' },
     { title: 'Quiz: AI Ethics Basics', type: 'quiz' },
   ]);
+  const navigate = useNavigate();
 
   return (
     <Box p={3} className="dashboard-bg">
@@ -55,7 +57,7 @@ export default function Dashboard({ SERVER_URL }) {
                   🧪 Generate a Quiz
                 </Typography>
                 <Stack spacing={2}>
-                  <Button variant="outlined" color="primary" fullWidth>
+                <Button variant="outlined" onClick={() => navigate('/generate-quiz-from-doc')}>
                     From Document
                   </Button>
                   <Button variant="outlined" color="primary" fullWidth>

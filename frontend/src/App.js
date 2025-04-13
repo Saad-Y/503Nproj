@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { pastelTheme } from './theme';
 import Header from './components/Header';
 import SignupPage from './pages/SignupPage';
+import GenerateQuizFromDoc  from './components/GenerateQuizFromDoc';
+import QuizPage  from './pages/QuizPage';
 
 const SERVER_URL = 'http://localhost:5000';
 
@@ -27,6 +29,11 @@ export default function App() {
           <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage setIsAuthenticated={setIsAuthenticated} SERVER_URL={SERVER_URL} />} />
           <Route path="/dashboard" element={<Dashboard SERVER_URL={SERVER_URL} />} />
           <Route path="/signup" element={<SignupPage SERVER_URL={SERVER_URL} />} />
+          <Route
+              path="/generate-quiz-from-doc"
+              element={<GenerateQuizFromDoc SERVER_URL={SERVER_URL} />} />
+          <Route path="/quiz" element={<QuizPage />} />
+
         </Routes>
       </Router>
     </ThemeProvider>

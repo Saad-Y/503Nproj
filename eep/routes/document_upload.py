@@ -126,6 +126,20 @@ def batch_images(images, batch_size=5):
     for i in range(0, len(images), batch_size):
         yield images[i:i + batch_size]
 
+@document_upload_route.route('/documents', methods=['GET'])
+@token_required
+def get_all_documents(username):
+    docs = Doc.query.filter_by(owner_username = username).all()
+    results = []
+    for doc in docs:
+        results.append({
+            'id': doc.id,
+            'owner_username': doc.owner_username,
+            'title': doc.title
+        })
+
+    return jsonify(results)
+
 @document_upload_route.route("/upload_document", methods=["POST"])
 @token_required
 def upload_document(username):
