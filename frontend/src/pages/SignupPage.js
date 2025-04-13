@@ -47,7 +47,7 @@ export default function SignupPage({SERVER_URL}) {
   return (
     <Box className="login-container">
       <Paper elevation={10} className="login-paper">
-        <Typography variant="h4" color="white" gutterBottom textAlign="center">
+        <Typography variant="h4" color="black" gutterBottom textAlign="center">
           Sign Up for Learnify
         </Typography>
         <TextField
@@ -58,7 +58,7 @@ export default function SignupPage({SERVER_URL}) {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           InputLabelProps={{ style: { color: '#bbb' } }}
-          InputProps={{ style: { color: 'white' } }}
+          InputProps={{ style: { color: 'black' } }}
         />
         <TextField
           fullWidth
@@ -69,7 +69,7 @@ export default function SignupPage({SERVER_URL}) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           InputLabelProps={{ style: { color: '#bbb' } }}
-          InputProps={{ style: { color: 'white' } }}
+          InputProps={{ style: { color: 'black' } }}
         />
         <Button
           variant="contained"
@@ -81,7 +81,7 @@ export default function SignupPage({SERVER_URL}) {
         >
           {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
         </Button>
-        <Typography mt={2} color="white" textAlign="center">
+        <Typography mt={2} color="black" textAlign="center">
           Already have an account?{' '}
           <Link href="/" color="primary">
             Log in
