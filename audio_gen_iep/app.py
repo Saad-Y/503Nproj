@@ -5,7 +5,10 @@ from pathlib import Path
 from openai import OpenAI
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
+from prometheus_client import start_http_server, Counter, generate_latest
+import threading
 
+NB_CALLS = Counter('audio_gen_iep_total_calls', 'Total number of calls to audio gen iep')
 
 load_dotenv()
 app = Flask(__name__)
@@ -49,5 +52,14 @@ def synthesize():
         mimetype="audio/mpeg"
     )
 
+
+   
+
+# Function to start Prometheus and Flask servers
+def start_servers():
+    # Start the Prometheus HTTP server on port 8000
+    start_http_server(8000)
+
 if __name__ == '__main__':
+    server_thread = threading.Thread(target=start_servers)
     app.run(host="0.0.0.0", port=5003)

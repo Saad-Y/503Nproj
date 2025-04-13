@@ -6,6 +6,36 @@ from azure.keyvault.secrets import SecretClient
 import base64
 import requests
 import logging
+from prometheus_client import start_http_server, Counter, generate_latest, Histogram
+import threading
+
+# -------------------- Prometheus Metrics --------------------
+
+# Endpoint 1: /get_image_description
+IMG_CALLS = Counter('gpt_iep_image_calls_total', 'Total calls to /get_image_description')
+IMG_LATENCY = Histogram(
+    'gpt_iep_image_latency_seconds',
+    'Latency for /get_image_description',
+    buckets=[0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
+)
+IMG_ERRORS = Counter(
+    'gpt_iep_image_errors_total',
+    'Errors in /get_image_description',
+    ['error_type']
+)
+
+# Endpoint 2: /get_response
+RESP_CALLS = Counter('gpt_iep_response_calls_total', 'Total calls to /get_response')
+RESP_LATENCY = Histogram(
+    'gpt_iep_response_latency_seconds',
+    'Latency for /get_response',
+    buckets=[0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
+)
+RESP_ERRORS = Counter(
+    'gpt_iep_response_errors_total',
+    'Errors in /get_response',
+    ['error_type']
+)
 
 VAULT_URL = "https://vault503n.vault.azure.net/"
 credential = DefaultAzureCredential()
@@ -46,51 +76,59 @@ def get_image_description():
         - Images must be valid base64-encoded JPEGs.
         - The OpenAI API key must be correctly configured via `openai.api_key`.
     """
-    try:
-        data = request.get_json()
-        prompt = data.get('prompt', '')
-        images = data.get('images', [])
+    IMG_CALLS.inc()
+    with IMG_LATENCY.time():
+        try:
+            data = request.get_json()
+            prompt = data.get('prompt', '')
+            images = data.get('images', [])
 
-        if not images:
-            return jsonify({"error": "No images provided"}), 400
+            if not images:
+                IMG_ERRORS.labels(error_type='missing_images').inc()
+                return jsonify({"error": "No images provided"}), 400
 
-        # Build the message content with prompt and images
-        message_content = [{"type": "text", "text": prompt}]
-        for img_b64 in images:
-            message_content.append({
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/jpeg;base64,{img_b64}"
-                }
-            })
+            # Build the message content with prompt and images
+            message_content = [{"type": "text", "text": prompt}]
+            for img_b64 in images:
+                message_content.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{img_b64}"
+                    }
+                })
 
-        # OpenAI API call
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {openai.api_key}"
-        }
+            # OpenAI API call
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {openai.api_key}"
+            }
 
-        payload = {
-            "model": "gpt-4o",
-            "messages": [
-                {"role": "user", "content": message_content}
-            ],
-            "max_tokens": 500
-        }
+            payload = {
+                "model": "gpt-4o",
+                "messages": [
+                    {"role": "user", "content": message_content}
+                ],
+                "max_tokens": 500
+            }
 
-        response = requests.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers=headers,
-            json=payload
-        )
-        response.raise_for_status()
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers=headers,
+                json=payload
+            )
+            response.raise_for_status()
 
-        reply = response.json()['choices'][0]['message']['content']
-        return jsonify({"response": reply})
+            reply = response.json()['choices'][0]['message']['content']
+            return jsonify({"response": reply})
 
-    except Exception as e:
-        logging.error(e)
-        return jsonify({"error": str(e)}), 500
+        except requests.exceptions.HTTPError as e:
+            IMG_ERRORS.labels(error_type='openai_http_error').inc()
+            logging.error(e)
+            return jsonify({"error": str(e)}), 500
+        except Exception as e:
+            IMG_ERRORS.labels(error_type='internal_error').inc()
+            logging.error(e)
+            return jsonify({"error": str(e)}), 500
 
 @app.route("/get_response", methods=['POST'])
 def get_response():
@@ -108,41 +146,58 @@ def get_response():
         - 500: {"error": "<exception message>"} if an error occurs during the API call
 
     """
-    try:
-        data = request.get_json()
-        system_message = data.get('system_message', '')
-        context = data.get('context', '')
+    RESP_CALLS.inc()
+    with RESP_LATENCY.time():
+        try:
+            data = request.get_json()
+            system_message = data.get('system_message', '')
+            context = data.get('context', '')
 
-        if not context or not system_message:
-            return jsonify({"error": "No prompt provided"}), 400
+            if not context or not system_message:
+                RESP_ERRORS.labels(error_type='missing_prompt').inc()
+                return jsonify({"error": "No prompt provided"}), 400
 
 
-        # OpenAI API call
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {openai.api_key}"
-        }
+            # OpenAI API call
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {openai.api_key}"
+            }
 
-        payload = {
-            "model": "gpt-4o",
-            "messages": [
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": context}
-            ],
-        }
+            payload = {
+                "model": "gpt-4o",
+                "messages": [
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": context}
+                ],
+            }
 
-        response = requests.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers=headers,
-            json=payload
-        )
-        response.raise_for_status()
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers=headers,
+                json=payload
+            )
+            response.raise_for_status()
 
-        reply = response.json()['choices'][0]['message']['content']
-        return jsonify({"response": reply})
+            reply = response.json()['choices'][0]['message']['content']
+            return jsonify({"response": reply})
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        except requests.exceptions.HTTPError as e:
+            RESP_ERRORS.labels(error_type='openai_http_error').inc()
+            return jsonify({"error": str(e)}), 500
+        except Exception as e:
+            RESP_ERRORS.labels(error_type='internal_error').inc()
+            return jsonify({"error": str(e)}), 500
+
+
+@app.route("/metrics")
+def metrics():
+    return generate_latest(), 200, {'Content-Type': 'text/plain; version=0.0.4'}
+   
+def start_servers():
+    start_http_server(8000)
+
 
 if __name__ == '__main__':
+    server_thread = threading.Thread(target=start_servers)
     app.run(host="0.0.0.0", port=5002)
