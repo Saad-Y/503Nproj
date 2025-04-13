@@ -87,6 +87,11 @@ def authenticate():
     logging.info(f'Login successful by {username}')
     return resp
 
+@auth_routes.route('/logout', methods=['POST'])
+def logout():
+    response = jsonify({'message': 'Logged out'})
+    response.set_cookie('learnify-token', '', expires=0, httponly=True, samesite='Lax')
+    return response
 
 @auth_routes.route('/signup', methods=['POST'])
 def signup():
