@@ -1,103 +1,82 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Button,
   TextField,
   Typography,
   Paper,
-  CircularProgress,
-  Snackbar,
   Alert,
-  Link
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import './LoginPage.css';
 
-export default function SignupPage({SERVER_URL}) {
+export default function SignupPage({ SERVER_URL }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = async () => {
-    setLoading(true);
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
     try {
-      const response = await fetch(`${SERVER_URL}/signup`, {
+      const res = await fetch(`${SERVER_URL}/signup`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Signup failed');
+      if (res.ok) {
+        setSuccess(true);
+        setTimeout(() => navigate('/'), 1500);
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Signup failed');
       }
-
-      setSnackbar({ open: true, message: 'Signup successful!', severity: 'success' });
-      setTimeout(() => navigate('/dashboard'), 1000);
-    } catch (error) {
-      setSnackbar({ open: true, message: 'Signup failed!', severity: 'error' });
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      setError('Signup Failed');
     }
   };
 
   return (
     <Box className="login-container">
-      <Paper elevation={10} className="login-paper">
-        <Typography variant="h4" color="black" gutterBottom textAlign="center">
-          Sign Up for Learnify
-        </Typography>
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Username"
-          variant="outlined"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          InputLabelProps={{ style: { color: '#bbb' } }}
-          InputProps={{ style: { color: 'black' } }}
-        />
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Password"
-          type="password"
-          variant="outlined"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          InputLabelProps={{ style: { color: '#bbb' } }}
-          InputProps={{ style: { color: 'black' } }}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={handleSignup}
-          className="login-button"
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
-        </Button>
-        <Typography mt={2} color="black" textAlign="center">
-          Already have an account?{' '}
-          <Link href="/" color="primary">
-            Log in
-          </Link>
+      <Paper elevation={3} className="login-box">
+        <Typography variant="h5" className="login-title">Create an Account</Typography>
+        <form onSubmit={handleSignup}>
+          <TextField
+            fullWidth
+            label="Username"
+            margin="normal"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            label="Password"
+            type="password"
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ mt: 2 }}>Signup successful! Redirecting...</Alert>}
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            color="secondary"
+            sx={{ mt: 3 }}
+          >
+            Sign Up
+          </Button>
+        </form>
+        <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+          Already have an account? <Link to="/">Login</Link>
         </Typography>
       </Paper>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }

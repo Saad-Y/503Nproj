@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import { useEffect, useState } from 'react';
 import { pastelTheme } from './theme';
 import Header from './components/Header';
+import SignupPage from './pages/SignupPage';
 
 const SERVER_URL = 'http://localhost:5000';
 
@@ -25,6 +26,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage setIsAuthenticated={setIsAuthenticated} SERVER_URL={SERVER_URL} />} />
           <Route path="/dashboard" element={<Dashboard SERVER_URL={SERVER_URL} />} />
+          <Route path="/signup" element={<SignupPage SERVER_URL={SERVER_URL} />} />
         </Routes>
       </Router>
     </ThemeProvider>

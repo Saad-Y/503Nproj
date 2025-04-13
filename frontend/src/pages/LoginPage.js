@@ -7,6 +7,7 @@ import {
   Paper,
   Alert,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import './LoginPage.css';
 
 export default function LoginPage({ setIsAuthenticated, SERVER_URL }) {
@@ -33,7 +34,7 @@ export default function LoginPage({ setIsAuthenticated, SERVER_URL }) {
         setError(data.error || 'Login failed');
       }
     } catch (err) {
-      setError('Network error');
+      setError('Login Failed');
     }
   };
 
@@ -68,6 +69,9 @@ export default function LoginPage({ setIsAuthenticated, SERVER_URL }) {
             Login
           </Button>
         </form>
+        <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+          Don't have an account? <Link to="/signup">Sign up here</Link>
+        </Typography>
       </Paper>
     </Box>
   );
