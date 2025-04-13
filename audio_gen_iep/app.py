@@ -41,12 +41,16 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 def synthesize():
     SYNTH_CALLS.inc()
     with SYNTH_LATENCY.time():
+        data = request.get_json()
+
+        if not data or "text" not in data:
+            SYNTH_ERRORS.labels(error_type="bad_request").inc()
+            return jsonify({"error": "Missing or invalid JSON with 'text' key"}), 400
+
+        text = data["text"]
         try:
             speech_file_path = Path(__file__).parent / "speech.mp3"
 
-            text = ("Mathematics is the universal language that unlocks the mysteries of the world around us. "
-                    "In this overview, we will explore the beauty of mathematical reasoning—from the precision of algebra "
-                    "and the elegance of geometry to the dynamic insights of calculus.")
             instructions = (
                 "Voice: Clear, authoritative, and composed, projecting confidence and professionalism.\n"
                 "Tone: Engaging and informative, maintaining a balance between formality and approachability.\n"
