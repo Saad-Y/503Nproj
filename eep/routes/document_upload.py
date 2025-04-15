@@ -4,7 +4,7 @@ from flask import request, abort, Blueprint, jsonify
 import magic
 from werkzeug.utils import secure_filename
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+import langchain.schema
 import base64
 import requests
 from pdf2image import convert_from_path
@@ -18,6 +18,7 @@ from database.database import db
 from model.doc import Doc
 from routes.auth_routes import token_required
 from database.vectordb import client
+from tools.file_processor_service import FileProcessorService
 
 GPT_IEP = 'localhost'
 EMBEDDINGS_IEP = 'localhost'
@@ -32,8 +33,7 @@ def allowed_file_type(file_path):
     mime = magic.Magic(mime=True)
     file_mime_type = mime.from_file(file_path)
     logging.info(f"Detected MIME type: {file_mime_type}")
-    logging.info(file_mime_type in ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'])
-    return file_mime_type in ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf']
+    return file_mime_type in ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -60,19 +60,7 @@ def encode_document(file_path):
     images_base64 = []
     
     if file_path.lower().endswith(".pdf"):
-        try:
-            # First try to extract text directly from PDF
-            pdf_text = ""
-            with open(file_path, 'rb') as pdf_file:
-                pdf_reader = PyPDF2.PdfReader(pdf_file)
-                for page_num in range(len(pdf_reader.pages)):
-                    page = pdf_reader.pages[page_num]
-                    pdf_text += page.extract_text() + "\n"
-            
-            # If we successfully extracted meaningful text, return it
-            if pdf_text.strip():
-                return pdf_text.strip()
-                
+        try:               
             # If no text or extraction failed, fall back to image conversion
             images = convert_from_path(file_path, dpi=300)
             for img in images:
@@ -81,31 +69,6 @@ def encode_document(file_path):
                 images_base64.append(base64.b64encode(buffer.getvalue()).decode("utf-8"))
         except Exception as e:
             logging.error(f"Failed to process PDF file: {e}")
-            return []
-    elif file_path.lower().endswith(".docx"):
-        try:
-            document = Document(file_path)
-            text = "\n".join([para.text for para in document.paragraphs])
-            extracted_text = text.strip()
-            if not extracted_text:
-                raise ValueError("The uploaded DOCX is empty or contains no extractable text.")
-            return extracted_text
-        except Exception as e:
-            logging.error(f"Failed to process DOCX file: {e}")
-            return []
-        
-    elif file_path.lower().endswith(".txt"):
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                text = f.read().strip()
-            if not text:
-                raise ValueError("The uploaded TXT file is empty.")
-            return text
-        except UnicodeDecodeError:
-            logging.error("The TXT file contains non-UTF-8 characters.")
-            return []
-        except Exception as e:
-            logging.error(f"Failed to process TXT file: {e}")
             return []
         
     else:
@@ -140,9 +103,54 @@ def get_all_documents(username):
 
     return jsonify(results)
 
-@document_upload_route.route("/upload_document", methods=["POST"])
+def process_nonparsable_document(file_path):
+    images_base64 = encode_document(file_path)
+    if not images_base64:
+        abort(503)
+
+    # Prepare request to GPT-4o image analysis endpoint
+    processed_chunks = []
+    prompt = "Extract all key ideas from these images and create concise study notes from them."
+
+    for batch in batch_images(images_base64, batch_size=5):
+        try:
+            response = requests.post(
+                f"http://{GPT_IEP}:5002/get_image_description",
+                json={
+                    "prompt": prompt,
+                    "images": batch
+                }
+            )
+            response.raise_for_status()
+            chunk = response.json().get('response', '')
+            if chunk:
+                processed_chunks.append(chunk)
+        except Exception as e:
+            logging.error(f"Failed batch image description: {e}")
+            continue  # Skip bad batch
+
+    return processed_chunks
+
+def process_parsable_document(file):
+    try:
+        file_processor = FileProcessorService
+        text = file_processor.process_file(file)
+        return text
+    except ValueError as e:
+        abort(400)
+
+@document_upload_route.route("/upload_document_parsable", methods=["POST"])
 @token_required
-def upload_document(username):
+def upload_document_parsable(username):
+    return upload_document(username, request, True)
+
+@document_upload_route.route("/upload_document_non_parsable", methods=["POST"])
+@token_required
+def upload_document_non_parsable(username):
+    return upload_document(username, request, False)
+
+
+def upload_document(username, request, parsable):
     """
     Handles the upload, processing, and embedding of a document (PDF or image).
 
@@ -196,35 +204,13 @@ def upload_document(username):
     else:
         abort(400)
 
-    images_base64 = encode_document(file_path)
-    if not images_base64:
-        abort(503)
-
-    # Prepare request to GPT-4o image analysis endpoint
-    processed_chunks = []
-
-    prompt = "Extract all key ideas from these images and create concise study notes from them."
-
-    for batch in batch_images(images_base64, batch_size=5):
-        try:
-            response = requests.post(
-                f"http://{GPT_IEP}:5002/get_image_description",
-                json={
-                    "prompt": prompt,
-                    "images": batch
-                }
-            )
-            response.raise_for_status()
-            chunk = response.json().get('response', '')
-            if chunk:
-                processed_chunks.append(chunk)
-        except Exception as e:
-            logging.error(f"Failed batch image description: {e}")
-            continue  # Skip bad batch
-
+    if parsable == False:
+        processed_chunks = process_nonparsable_document(file_path)
+        processed_text = "\n\n".join(processed_chunks)
+    else:
+        processed_text = process_parsable_document(file)
+        
     os.remove(file_path)
-
-    processed_text = "\n\n".join(processed_chunks)
     
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=800,         
@@ -232,7 +218,7 @@ def upload_document(username):
         separators=["\n\n", "\n", ". ", " ", ""],  
     )
 
-    document = Document(page_content=processed_text)
+    document = langchain.schema.Document(page_content=processed_text)
     data = text_splitter.split_documents([document])
     collection = client.get_or_create_collection(name=username)
     try:
