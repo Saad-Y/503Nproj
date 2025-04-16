@@ -14,6 +14,7 @@ import { Upload } from 'lucide-react';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 import TopicDialog from '../components/TopicDialog'
+import UploadDocument from './UploadDocument';
 
 export default function Dashboard({ SERVER_URL }) {
   const [recommendations, setRecommendations] = useState([
@@ -33,21 +34,15 @@ export default function Dashboard({ SERVER_URL }) {
         <Grid item xs={12} md={10} lg={8}>
           <Card className="dashboard-card center-card">
             <CardContent>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                📤 Upload Document
-              </Typography>
-              <ToggleButtonGroup exclusive sx={{ mb: 2 }}>
-                <ToggleButton value="parsable">Parsable</ToggleButton>
-                <ToggleButton value="non-parsable">Non-parsable</ToggleButton>
-              </ToggleButtonGroup>
-              <Button
-                variant="contained"
-                startIcon={<Upload />}
-                size="large"
-                color="secondary"
-              >
-                Upload PDF / Image
-              </Button>
+            <Grid item xs={12} md={10} lg={8}>
+              <Card className="dashboard-card">
+                <CardContent>
+                  {/* Other content here... */}
+                  <UploadDocument SERVER_URL={SERVER_URL} />
+                </CardContent>
+              </Card>
+            </Grid>
+
             </CardContent>
           </Card>
         </Grid>
@@ -55,16 +50,33 @@ export default function Dashboard({ SERVER_URL }) {
         {/* Quiz Generator & Notes Section */}
         <Grid item container spacing={3} xs={12} md={10} lg={8}>
           <Grid item xs={12} md={6}>
-            <Card className="dashboard-card">
+              <Card className="dashboard-card" style={{ height: '100%' }}>
+                <CardContent>
+                  <Stack spacing={2} justifyContent="center" sx={{ minHeight: '250px' }}>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                      🧪 Generate a Quiz
+                    </Typography>
+                    <Button variant="outlined" onClick={() => navigate('/generate-quiz-from-doc')}>
+                      From Document
+                    </Button>
+                    <Button variant="outlined" onClick={() => setTopicOpen(true)}>
+                      From Topic
+                    </Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card className="dashboard-card" style={{ height: '100%' }}>
               <CardContent>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                  🧪 Generate a Quiz
-                </Typography>
-                <Stack spacing={2}>
-                <Button variant="outlined" onClick={() => navigate('/generate-quiz-from-doc')}>
+                <Stack spacing={2} justifyContent="center" sx={{ minHeight: '250px' }}>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    📝 Fetch Notes
+                  </Typography>
+                  <Button variant="outlined" color="info" fullWidth>
                     From Document
                   </Button>
-                  <Button variant="outlined"  onClick={() => setTopicOpen(true)}>
+                  <Button variant="outlined" color="info" fullWidth>
                     From Topic
                   </Button>
                 </Stack>
@@ -72,23 +84,6 @@ export default function Dashboard({ SERVER_URL }) {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Card className="dashboard-card">
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                  📝 Fetch Notes
-                </Typography>
-                <Stack spacing={2}>
-                  <Button variant="outlined" color="info" fullWidth>
-                    From Document
-                  </Button>
-                  <Button variant="outlined" color="info" fullWidth>
-                    From Topic
-                  </Button>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
         </Grid>
 
         {/* Recommendations */}

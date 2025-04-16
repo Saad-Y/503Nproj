@@ -17,6 +17,19 @@ export default function GenerateQuizFromDoc({ SERVER_URL }) {
   const [quiz, setQuiz] = useState(null);
   const navigate = useNavigate();
 
+
+  function cleanAndExtractJSON(rawQuiz) {
+    // Remove all markdown code fences
+    const cleaned = rawQuiz.replace(/```json|```/g, '');
+  
+    // Match the first valid JSON array
+    const match = cleaned.match(/\[\s*{[\s\S]*?}\s*\]/);
+  
+    if (!match) throw new Error("No valid JSON array found.");
+  
+    return JSON.parse(match[0]);
+  }
+
   // Fetch documents on load
   useEffect(() => {
     fetch(`${SERVER_URL}/documents`, {
@@ -50,13 +63,7 @@ export default function GenerateQuizFromDoc({ SERVER_URL }) {
       .then((data) => {
         setLoading("");
         let rawQuiz = data.quiz;
-
-        // Remove markdown code fencing if it exists
-        if (typeof rawQuiz === 'string' && rawQuiz.startsWith('```')) {
-        rawQuiz = rawQuiz.replace(/```(?:json)?\n?/, '').replace(/```$/, '');
-        }
-
-        const quizArray = JSON.parse(rawQuiz);
+        const quizArray = cleanAndExtractJSON(rawQuiz);
         navigate('/quiz', { state: { quiz: quizArray } });
       })
       .catch((err) => {
