@@ -30,10 +30,7 @@ load_dotenv()
 app = Flask(__name__)
 
 
-VAULT_URL = "https://vault503n.vault.azure.net/"
-credential = DefaultAzureCredential()
-client = SecretClient(vault_url=VAULT_URL, credential=credential)
-OPENAI_API_KEY = client.get_secret('OPENAI-API-KEY').value
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 

@@ -1,10 +1,7 @@
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
+import os
+from dotenv import load_dotenv
 
-VAULT_URL = "https://vault503n.vault.azure.net/"
-credential = DefaultAzureCredential()
-client = SecretClient(vault_url=VAULT_URL, credential=credential)
-OPENAI_API_KEY = client.get_secret('OPENAI-API-KEY').value
-mysql_password = client.get_secret("DB-PASSWORD").value
-ssl_cert = client.get_secret("DigiCert-CA-Cert").value
-SECRET_KEY = client.get_secret('SECRET-KEY').value
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+mysql_password = os.getenv("DB_PASSWORD")
+ssl_cert = os.getenv("DigiCert_CA_Cert")
+SECRET_KEY = os.getenv('SECRET_KEY')

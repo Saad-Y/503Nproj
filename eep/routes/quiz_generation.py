@@ -7,9 +7,10 @@ from routes.auth_routes import token_required
 from database.vectordb import client
 import logging
 import requests
+import os
 
-GPT_IEP = 'localhost'
-EMBEDDINGS_IEP = 'localhost'
+GPT_IEP = os.getenv("GPT_IEP", "gpt")
+EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "embeddings")
 
 quiz_routes = Blueprint("quiz_routes", __name__)
 

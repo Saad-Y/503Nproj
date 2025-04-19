@@ -20,8 +20,8 @@ from routes.auth_routes import token_required
 from database.vectordb import client
 from tools.file_processor_service import FileProcessorService
 
-GPT_IEP = 'localhost'
-EMBEDDINGS_IEP = 'localhost'
+GPT_IEP = os.getenv("GPT_IEP", "gpt")
+EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "embeddings")
 
 document_upload_route = Blueprint('document_upload_routes', __name__)
 

@@ -10,6 +10,8 @@ services:
       - my_network
     ports:
       - "5001:5001"
+    environment:
+      - OPENAI_API_KEY
 
   gpt:
     build:
@@ -20,6 +22,10 @@ services:
       - my_network
     ports:
       - "5002:5002"
+    
+    environment:
+      - OPENAI_API_KEY
+
 
   audio_gen:
     build:
@@ -30,8 +36,12 @@ services:
       - my_network
     ports:
       - "5003:5003"
+    environment:
+      - OPENAI_API_KEY
 
   eep:
+    env_file:
+      - ./.env
     build:
       context: ./eep
 
@@ -40,6 +50,9 @@ services:
       - my_network
     ports:
       - "5000:5000"
+
+
+
 
   prometheus:
     image: prom/prometheus

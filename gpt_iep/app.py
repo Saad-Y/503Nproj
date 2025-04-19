@@ -8,6 +8,9 @@ import requests
 import logging
 from prometheus_client import start_http_server, Counter, generate_latest, Histogram
 import threading
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # -------------------- Prometheus Metrics --------------------
 
@@ -37,10 +40,8 @@ RESP_ERRORS = Counter(
     ['error_type']
 )
 
-VAULT_URL = "https://vault503n.vault.azure.net/"
-credential = DefaultAzureCredential()
-client = SecretClient(vault_url=VAULT_URL, credential=credential)
-openai.api_key = client.get_secret('OPENAI-API-KEY').value
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})

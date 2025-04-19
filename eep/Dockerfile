@@ -15,5 +15,8 @@ COPY . .
 # Expose port 5000
 EXPOSE 5000
 
+RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 && rm -rf /var/lib/apt/lists/*
+RUN pip install filemagic
+
 # Command to run the application
 CMD ["python3", "app.py"]
