@@ -17,16 +17,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Azure Login via OIDC
-      uses: azure/login@v1.6.1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        auth-type: IDENTITY
-        identity-id: /subscriptions/7f09d7a4-8b8e-4c9e-91ad-d1820abf1358/resourcegroups/LearnifyAI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/gh-identity
+    - name: Azure Login using federated token
+      run: |
+        echo "Getting ID token from GitHub OIDC provider..."
+        AZ_TOKEN=$(curl -sLSH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
 
-
+        echo "Logging in to Azure CLI using federated token..."
+        az login --federated-token "$AZ_TOKEN" \
+          --tenant ${{ secrets.AZURE_TENANT_ID }} \
+          --username ${{ secrets.AZURE_CLIENT_ID }} \
+          --allow-no-subscriptions
+      shell: bash
     - name: Login to ACR
       run: az acr login --name ${{ secrets.ACR_NAME }}
 
