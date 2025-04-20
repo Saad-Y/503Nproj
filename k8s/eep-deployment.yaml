@@ -25,12 +25,12 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: DB_PASSWORD
+                  name: db-password
                   key: db-password
             - name: DigiCert_CA_Cert
               valueFrom:
                 secretKeyRef:
-                  name: DigiCert_CA_Cert
+                  name: ca-cert
                   key: ca-cert
             - name: EMBEDDINGS_IEP
               value: 'embeddings'
@@ -46,7 +46,7 @@ spec:
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: SECRET_KEY
+                  name: secret-key
                   key: secret-key
           image: learnifyacr.azurecr.io/eep:latest
           livenessProbe:
