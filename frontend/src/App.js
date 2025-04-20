@@ -9,7 +9,7 @@ import SignupPage from './pages/SignupPage';
 import GenerateQuizFromDoc  from './components/GenerateQuizFromDoc';
 import QuizPage  from './pages/QuizPage';
 
-const SERVER_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+const SERVER_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 console.log(SERVER_URL);
 
 export default function App() {
