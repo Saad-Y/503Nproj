@@ -9,8 +9,8 @@ import logging
 import requests
 import os
 
-GPT_IEP = os.getenv("GPT_IEP", "gpt")
-EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "embeddings")
+GPT_IEP = os.getenv("GPT_IEP", "gpt:5002")
+EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "embeddings:5001")
 
 quiz_routes = Blueprint("quiz_routes", __name__)
 
@@ -83,7 +83,7 @@ def generate_quiz(username):
             chunks = results["documents"]
         else:
             embeddings_response = requests.post(
-                f"http://{EMBEDDINGS_IEP}:5001/generate_embeddings",
+                f"http://{EMBEDDINGS_IEP}/generate_embeddings",
                 json={"text": topic}
             )
             embeddings_response.raise_for_status()
@@ -113,7 +113,7 @@ def generate_quiz(username):
     for i, section in enumerate(sub_chunks):
         try:
             response = requests.post(
-                f"http://{GPT_IEP}:5002/get_response",
+                f"http://{GPT_IEP}/get_response",
                 json={
                     "system_message": system_message,
                     "context": section
@@ -161,7 +161,7 @@ def generate_insights():
     for answer in wrong_answers:
         try:
             response = requests.post(
-                f"http://{GPT_IEP}:5002/get_response",
+                f"http://{GPT_IEP}/get_response",
                 json={
                     "system_message": "You are an expert teacher. Provide a very brief explanation for the following correct answer:",
                     "context": answer["correct_answer"]

@@ -20,8 +20,8 @@ from routes.auth_routes import token_required
 from database.vectordb import client
 from tools.file_processor_service import FileProcessorService
 
-GPT_IEP = os.getenv("GPT_IEP", "gpt")
-EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "embeddings")
+GPT_IEP = os.getenv("GPT_IEP", "gpt:5002")
+EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "embeddings:5002")
 
 document_upload_route = Blueprint('document_upload_routes', __name__)
 
@@ -115,7 +115,7 @@ def process_nonparsable_document(file_path):
     for batch in batch_images(images_base64, batch_size=5):
         try:
             response = requests.post(
-                f"http://{GPT_IEP}:5002/get_image_description",
+                f"http://{GPT_IEP}/get_image_description",
                 json={
                     "prompt": prompt,
                     "images": batch
@@ -234,7 +234,7 @@ def upload_document(username, request, parsable):
         entry_id = f"{file_path}-{index}"
         try:
             response = requests.post(
-                f"http://{EMBEDDINGS_IEP}:5001/generate_embeddings",
+                f"http://{EMBEDDINGS_IEP}/generate_embeddings",
                 json={"text": item.page_content}
             )
             response.raise_for_status()
