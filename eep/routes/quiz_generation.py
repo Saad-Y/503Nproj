@@ -74,7 +74,7 @@ def generate_quiz(username):
     if document_id and topic:
         return jsonify({"error": "only specify one of 'document_id' and 'topic'"}), 400
 
-    collection = client.get_collection(name=username)
+    collection = client.get_or_create_collection(name=username)
 
     try:
         if document_id:
@@ -132,3 +132,45 @@ def generate_quiz(username):
         "username": username,
         "quiz": full_quiz
     }), 200
+
+# Generate insights for wrong answers
+@quiz_routes.route("/generate_insights", methods=["POST"])
+def generate_insights():
+    """
+    Generates insights for wrong answers by querying GPT.
+
+    Expects:
+        JSON payload with:
+        - "wrong_answers" (list): List of wrong answers with question and correct answer.
+
+    Returns:
+        - 200 OK:
+            JSON object containing:
+                - "insights" (list): List of insights for each wrong answer.
+        - 400 Bad Request: If the payload is missing or invalid.
+        - 502 Bad Gateway: If GPT service fails.
+    """
+    data = request.get_json()
+    wrong_answers = data.get("wrong_answers", [])
+
+    if not wrong_answers:
+        return jsonify({"error": "Missing or invalid wrong_answers payload"}), 400
+
+    insights = []
+    for answer in wrong_answers:
+        try:
+            response = requests.post(
+                f"http://{GPT_IEP}:5002/get_response",
+                json={
+                    "system_message": "You are an expert teacher. Provide a very brief explanation for the following correct answer:",
+                    "context": answer["correct_answer"]
+                }
+            )
+            response.raise_for_status()
+            insight = response.json().get('response', '')
+            insights.append({"question": answer["question"], "insight": insight})
+        except Exception as e:
+            logging.error("Error generating insight: " + str(e))
+            return jsonify({"error": "Failed to generate insights"}), 502
+
+    return jsonify({"insights": insights}), 200
