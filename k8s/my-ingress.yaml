@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api/eep(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: eep
+                port:
+                  number: 5000
+          - path: /api/gpt(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: gpt
+                port:
+                  number: 5002
+          - path: /api/audio-gen(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: audio-gen
+                port:
+                  number: 5003
+          - path: /api/embeddings(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: embeddings
+                port:
+                  number: 5001
+          - path: /()(.*)  # frontend fallback
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000
