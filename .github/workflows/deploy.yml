@@ -50,6 +50,15 @@ jobs:
         resource-group: ${{ secrets.RESOURCE_GROUP }}
         cluster-name: ${{ secrets.AKS_CLUSTER }}
 
+    - name: Inject secrets into Kubernetes Secret
+      run: |
+        kubectl create secret generic app-secrets \
+          --from-literal=api-key="${{ secrets.OPENAI_API_KEY }}" \
+          --from-literal=db-password="${{ secrets.DB_PASSWORD }}" \
+          --from-literal=ca-cert="${{ secrets.DigiCert_CA_Cert }}" \
+          --from-literal=secret-key="${{ secrets.SECRET_KEY }}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
     - name: Deploy to AKS
       run: |
         kubectl apply -f k8s/env-configmap.yaml

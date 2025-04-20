@@ -59,6 +59,8 @@ services:
       start_period: 10s
 
   frontend:
+    env_file:
+      - ./.env
     build:
       context: ./frontend
 

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f docker-compose.yml
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: eep
+  name: eep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: eep
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f docker-compose.yml
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: eep
+    spec:
+      containers:
+        - env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: DB_PASSWORD
+                  key: db-password
+            - name: DigiCert_CA_Cert
+              valueFrom:
+                secretKeyRef:
+                  name: DigiCert_CA_Cert
+                  key: ca-cert
+            - name: EMBEDDINGS_IEP
+              value: 'embeddings'
+            - name: GPT_IEP
+              value: 'gpt'
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-secret
+                  key: api-key
+            - name: REACT_APP_API_URL
+              value: 'http://localhost:5000'
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: SECRET_KEY
+                  key: secret-key
+          image: learnifyacr.azurecr.io/eep:latest
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -f
+                - http://localhost:5000/
+            failureThreshold: 20
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 10
+          name: eep
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+      restartPolicy: Always
