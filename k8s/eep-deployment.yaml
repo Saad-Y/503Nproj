@@ -33,11 +33,11 @@ spec:
                   name: app-secrets
                   key: ca-cert
             - name: EMBEDDINGS_IEP
-              value: '20.233.221.128/api/embeddings'
+              value: 'https://20.233.221.128/api/embeddings'
             - name: GPT_IEP
-              value: '20.233.221.128/api/gpt'
+              value: 'https://20.233.221.128/api/gpt'
             - name: AUDIO_GEN_IEP
-              value: '20.233.221.128/api/audio-gen'
+              value: 'https://20.233.221.128/api/audio-gen'
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
