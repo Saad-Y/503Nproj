@@ -42,7 +42,7 @@ spec:
                   name: app-secrets
                   key: api-key
             - name: REACT_APP_API_URL
-              value: 'http://eep:5000'
+              value: 'http://20.233.145.140:5000'
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
