@@ -44,7 +44,11 @@ jobs:
         docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest ./embeddings_iep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest
 
-        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest ./frontend
+        docker build \
+          --build-arg REACT_APP_API_URL=http://${{ secrets.REACT_APP_API_URL }}:5000 \
+          -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest \
+          ./frontend
+
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
 
         docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/gpt:latest ./gpt_iep
