@@ -50,11 +50,14 @@ jobs:
         docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/gpt:latest ./gpt_iep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/gpt:latest
 
-    - name: Set AKS context
-      uses: azure/aks-set-context@v3
-      with:
-        resource-group: ${{ secrets.RESOURCE_GROUP }}
-        cluster-name: ${{ secrets.AKS_CLUSTER }}
+    - name: Set AKS context manually
+      run: |
+        az aks get-credentials \
+          --resource-group ${{ secrets.RESOURCE_GROUP }} \
+          --name ${{ secrets.AKS_CLUSTER }} \
+          --admin \
+          --overwrite-existing
+
 
     - name: Inject secrets into Kubernetes Secret
       run: |
