@@ -17,6 +17,8 @@ EXPOSE 5000
 
 RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 && rm -rf /var/lib/apt/lists/*
 RUN pip install filemagic
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 
 # Command to run the application
 CMD ["python3", "app.py"]

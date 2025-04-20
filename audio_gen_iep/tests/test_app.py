@@ -2,6 +2,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from ..app import app
+import json
 
 @pytest.fixture
 def client():
@@ -15,7 +16,12 @@ def test_synthesize_success(mock_create, client):
     mock_stream = MagicMock()
     mock_create.return_value.__enter__.return_value = mock_stream
 
-    response = client.get("/synthesize")
+    # Simulate a GET request with JSON body (non-standard but supported by test client)
+    response = client.get(
+        "/synthesize",
+        data=json.dumps({"text": "Hello students!"}),
+        content_type="application/json"
+    )
 
     # Assert that the streaming call was made
     mock_stream.stream_to_file.assert_called_once()

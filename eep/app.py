@@ -13,11 +13,21 @@ openai.api_key = OPENAI_API_KEY
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": [
             "http://localhost:3000",
-            "http://localhost:3001"
+            "http://localhost:3001",
+            "http://0.0.0.0:80",
+            "http://localhost:80",
+            "http://frontend:80"
+            "http://localhost"
         ]}}, supports_credentials=True)
 app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
 app.register_blueprint(quiz_routes)
+
+@app.route('/', methods=['GET'])
+def healthcheck():
+    return jsonify({"status": "ok"}), 200
+
+
 # Connect to db
 cert = "-----BEGIN CERTIFICATE-----\n" + '\n'.join([ssl_cert[i:i+64] for i in range(0, len(ssl_cert), 64)]) + "\n-----END CERTIFICATE-----"
 os.makedirs('tmp', exist_ok=True)
