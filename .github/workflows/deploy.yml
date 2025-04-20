@@ -24,7 +24,7 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         auth-type: IDENTITY
-        identity-id : /subscriptions/7f09d7a4-8b8e-4c9e-91ad-d1820abf1358/resourcegroups/LearnifyAI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/gh-identity
+        identity-id: /subscriptions/7f09d7a4-8b8e-4c9e-91ad-d1820abf1358/resourcegroups/LearnifyAI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/gh-identity
 
 
     - name: Login to ACR
