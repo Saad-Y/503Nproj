@@ -62,6 +62,13 @@ jobs:
           --admin \
           --overwrite-existing
 
+    - name: Force restart of deployment
+      run: |
+        for d in frontend eep gpt embeddings audio-gen; do
+          kubectl rollout restart deployment $d
+        done
+
+
     - name: Write secrets safely to files
       shell: python
       run: |
