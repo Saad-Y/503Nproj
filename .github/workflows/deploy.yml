@@ -88,7 +88,7 @@ jobs:
 
     - name: Deploy to AKS
       run: |
-        kubectl apply -f my-ingress.yaml
+        kubectl apply -f k8s/my-ingress.yaml
         kubectl apply -f k8s/audio-gen-deployment.yaml
         kubectl apply -f k8s/audio_gen-service.yaml
         kubectl apply -f k8s/eep-deployment.yaml
