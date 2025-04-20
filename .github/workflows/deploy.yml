@@ -2,10 +2,11 @@ name: Build and Deploy to AKS
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -16,26 +17,32 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Azure Login
+    - name: Azure Login via OIDC
       uses: azure/login@v1
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: ACR Login
-      run: |
-        az acr login --name ${{ secrets.ACR_NAME }}
+    - name: Login to ACR
+      run: az acr login --name ${{ secrets.ACR_NAME }}
 
-    - name: Build and push app1
+    - name: Build and push app images
       run: |
-        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/app1:latest ./app1
-        docker push ${{ secrets.ACR_NAME }}.azurecr.io/app1:latest
+        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/audio-gen:latest ./audio_gen_iep
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/audio-gen:latest
 
-    - name: Build and push app2
-      run: |
-        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/app2:latest ./app2
-        docker push ${{ secrets.ACR_NAME }}.azurecr.io/app2:latest
+        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/eep:latest ./eep
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/eep:latest
+
+        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest ./embeddings_iep
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest
+
+        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest ./frontend
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
+
+        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/gpt:latest ./gpt_iep
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/gpt:latest
 
     - name: Set AKS context
       uses: azure/aks-set-context@v3
@@ -45,4 +52,14 @@ jobs:
 
     - name: Deploy to AKS
       run: |
-        kubectl apply -f k8s/
+        kubectl apply -f k8s/env-configmap.yaml
+        kubectl apply -f k8s/audio-gen-deployment.yaml
+        kubectl apply -f k8s/audio_gen-service.yaml
+        kubectl apply -f k8s/eep-deployment.yaml
+        kubectl apply -f k8s/eep-service.yaml
+        kubectl apply -f k8s/embeddings-deployment.yaml
+        kubectl apply -f k8s/embeddings-service.yaml
+        kubectl apply -f k8s/frontend-deployment.yaml
+        kubectl apply -f k8s/frontend-service.yaml
+        kubectl apply -f k8s/gpt-deployment.yaml
+        kubectl apply -f k8s/gpt-service.yaml
