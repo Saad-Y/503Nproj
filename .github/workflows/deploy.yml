@@ -61,7 +61,7 @@ jobs:
 
     - name: Inject secrets into Kubernetes Secret
       run: |
-        cat <<EOF | kubectl apply -f -
+        cat > app-secret.yaml <<EOF
         apiVersion: v1
         kind: Secret
         metadata:
@@ -70,10 +70,13 @@ jobs:
         stringData:
           api-key: "${{ secrets.OPENAI_API_KEY }}"
           db-password: "${{ secrets.DB_PASSWORD }}"
-          ca-cert: "${{ secrets.DigiCert_CA_Cert }}"
           secret-key: "${{ secrets.SECRET_KEY }}"
+          ca-cert: |
+            ${{ secrets.DigiCert_CA_Cert }}
         EOF
-        
+
+        kubectl apply -f app-secret.yaml
+
     - name: Deploy to AKS
       run: |
         kubectl apply -f k8s/env-configmap.yaml
