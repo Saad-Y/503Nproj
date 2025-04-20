@@ -22,13 +22,15 @@ jobs:
         echo "Getting ID token from GitHub OIDC provider..."
         AZ_TOKEN=$(curl -sLSH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
           "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
-
+    
         echo "Logging in to Azure CLI using federated token..."
-        az login --federated-token "$AZ_TOKEN" \
+        az login --service-principal \
+          --federated-token "$AZ_TOKEN" \
           --tenant ${{ secrets.AZURE_TENANT_ID }} \
           --username ${{ secrets.AZURE_CLIENT_ID }} \
           --allow-no-subscriptions
       shell: bash
+      
     - name: Login to ACR
       run: az acr login --name ${{ secrets.ACR_NAME }}
 
