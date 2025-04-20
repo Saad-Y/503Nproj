@@ -58,22 +58,21 @@ jobs:
           --admin \
           --overwrite-existing
 
-
-    - name: Inject secrets into Kubernetes Secret
+    - name: Write secrets safely to files
+      shell: python
       run: |
-        printf "%s" "${{ secrets.OPENAI_API_KEY }}" > api-key.txt
-        printf "%s" "${{ secrets.DB_PASSWORD }}" > db-password.txt
-        printf "%s" "${{ secrets.DigiCert_CA_Cert }}" > ca-cert.txt
-        printf "%s" "${{ secrets.SECRET_KEY }}" > secret-key.txt
-
+        with open("api-key.txt", "w") as f: f.write("${{ secrets.OPENAI_API_KEY }}")
+        with open("db-password.txt", "w") as f: f.write("${{ secrets.DB_PASSWORD }}")
+        with open("ca-cert.txt", "w") as f: f.write("${{ secrets.DigiCert_CA_Cert }}")
+        with open("secret-key.txt", "w") as f: f.write("${{ secrets.SECRET_KEY }}")
+    - name: Create Kubernetes Secret
+      run: |
         kubectl create secret generic app-secrets \
           --from-file=api-key=api-key.txt \
           --from-file=db-password=db-password.txt \
           --from-file=ca-cert=ca-cert.txt \
           --from-file=secret-key=secret-key.txt \
           --dry-run=client -o yaml | kubectl apply -f -
-
-        rm -f api-key.txt db-password.txt ca-cert.txt secret-key.txt
 
 
     - name: Deploy to AKS
