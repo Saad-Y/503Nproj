@@ -77,7 +77,6 @@ jobs:
 
     - name: Deploy to AKS
       run: |
-        kubectl apply -f k8s/env-configmap.yaml
         kubectl apply -f k8s/audio-gen-deployment.yaml
         kubectl apply -f k8s/audio_gen-service.yaml
         kubectl apply -f k8s/eep-deployment.yaml
