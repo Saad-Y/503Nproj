@@ -12,6 +12,8 @@ import {
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'; // Added fallback for SERVER_URL
+
 export default function QuizPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -19,6 +21,8 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState("");
+  const [insights, setInsights] = useState([]);
+
   if (!quiz) {
     return (
       <Box p={4}>
@@ -31,7 +35,6 @@ export default function QuizPage() {
       </Box>
     );
   }
-
 
   const handleSelect = (questionIndex, optionIndex) => {
     if (submitted) return;
@@ -50,14 +53,61 @@ export default function QuizPage() {
     return score;
   };
 
-  const getWrongAnswers = () => {
-    return quiz
+ 
+  const getWrongAnswers = () =>
+    quiz
       .map((q, i) => ({
         question: q.question,
         selected: answers[i],
-        correct: q.answer,
+        correct:  q.answer,
+        index:    i,               // keep track of the original position
       }))
-      .filter((res) => res.selected !== res.correct);
+      .filter(res => res.selected !== res.correct);
+  
+
+  const fetchInsights = async () => {
+    const wrongAnswers = getWrongAnswers().map(({ question, correct, index }) => ({
+      question,
+      correct_answer: quiz[index].options[correct],
+    }));
+    
+
+    if (!SERVER_URL) {
+      console.error('SERVER_URL is not defined. Please set REACT_APP_SERVER_URL in your environment variables.');
+      setLoading('Server URL is not configured.');
+      return;
+    }
+
+    try {
+      setLoading('Fetching insights...');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No auth token found – please log in.');
+        return;
+      }
+
+      const res = await fetch(`${SERVER_URL}/generate_insights`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'X-Use-Cookie': 'true', // Added custom header to indicate cookie usage
+        },
+        body: JSON.stringify({ wrong_answers: wrongAnswers }),
+      });
+
+
+      if (!res.ok) {
+        throw new Error(`Server responded with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      setInsights(data.insights || []);
+      setLoading('');
+    } catch (err) {
+      console.error('Failed to fetch insights:', err);
+      setLoading('An error occurred while fetching insights.');
+    }
   };
 
   console.log("Type of quiz:", typeof quiz);
@@ -134,6 +184,23 @@ export default function QuizPage() {
                   </li>
                 ))}
               </ul>
+              <Button variant="outlined" onClick={fetchInsights} sx={{ mt: 2 }}>
+                Get Insights
+              </Button>
+              {insights.length > 0 && (
+                <Box mt={3}>
+                  <Typography variant="h6">💡 Insights:</Typography>
+                  <ul>
+                    {insights.map((insight, i) => (
+                      <li key={i}>
+                        <strong>Q:</strong> {insight.question}
+                        <br />
+                        <strong>Insight:</strong> {insight.insight}
+                      </li>
+                    ))}
+                  </ul>
+                </Box>
+              )}
             </Box>
           )}
         </>
