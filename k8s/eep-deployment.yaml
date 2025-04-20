@@ -25,12 +25,12 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: db-password
+                  name: app-secrets
                   key: db-password
             - name: DigiCert_CA_Cert
               valueFrom:
                 secretKeyRef:
-                  name: ca-cert
+                  name: app-secrets
                   key: ca-cert
             - name: EMBEDDINGS_IEP
               value: 'embeddings'
@@ -39,14 +39,14 @@ spec:
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: openai-secret
+                  name: app-secrets
                   key: api-key
             - name: REACT_APP_API_URL
               value: 'http://localhost:5000'
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: secret-key
+                  name: app-secrets
                   key: secret-key
           image: learnifyacr.azurecr.io/eep:latest
           livenessProbe:

@@ -25,7 +25,7 @@ spec:
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: openai-secret
+                  name: app-secrets
                   key: api-key
           image: learnifyacr.azurecr.io/gpt:latest
           name: gpt-iep
