@@ -61,21 +61,18 @@ jobs:
 
     - name: Inject secrets into Kubernetes Secret
       run: |
-        cat > app-secret.yaml <<EOF
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: app-secrets
-        type: Opaque
-        stringData:
-          api-key: "${{ secrets.OPENAI_API_KEY }}"
-          db-password: "${{ secrets.DB_PASSWORD }}"
-          secret-key: "${{ secrets.SECRET_KEY }}"
-          ca-cert: |
-            ${{ secrets.DigiCert_CA_Cert }}
-        EOF
+        echo "${{ secrets.OPENAI_API_KEY }}" > api-key.txt
+        echo "${{ secrets.DB_PASSWORD }}" > db-password.txt
+        echo "${{ secrets.DigiCert_CA_Cert }}" > ca-cert.txt
+        echo "${{ secrets.SECRET_KEY }}" > secret-key.txt
 
-        kubectl apply -f app-secret.yaml
+        kubectl create secret generic app-secrets \
+          --from-file=api-key=api-key.txt \
+          --from-file=db-password=db-password.txt \
+          --from-file=ca-cert=ca-cert.txt \
+          --from-file=secret-key=secret-key.txt \
+          --dry-run=client -o yaml | kubectl apply -f -
+
 
     - name: Deploy to AKS
       run: |
