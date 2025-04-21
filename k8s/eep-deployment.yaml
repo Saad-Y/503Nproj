@@ -37,14 +37,14 @@ spec:
             - name: GPT_IEP
               value: 'http://gpt:5002'
             - name: AUDIO_GEN_IEP
-              value: 'https://audio-gen:5003'
+              value: 'http://audio-gen:5003'
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
                   key: api-key
             - name: REACT_APP_API_URL
-              value: 'https://20.233.221.128/api/eep'
+              value: 'http://20.233.221.128/api/eep'
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
