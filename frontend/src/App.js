@@ -8,6 +8,7 @@ import Header from './components/Header';
 import SignupPage from './pages/SignupPage';
 import GenerateQuizFromDoc  from './components/GenerateQuizFromDoc';
 import QuizPage  from './pages/QuizPage';
+import AllDocuments from './pages/AllDocuments';
 
 const SERVER_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 console.log(SERVER_URL);
@@ -35,7 +36,7 @@ export default function App() {
               path="/generate-quiz-from-doc"
               element={<GenerateQuizFromDoc SERVER_URL={SERVER_URL} />} />
           <Route path="/quiz" element={<QuizPage />} />
-
+          <Route path="/all-documents" element={<AllDocuments SERVER_URL={SERVER_URL} />} />
         </Routes>
       </Router>
     </ThemeProvider>
