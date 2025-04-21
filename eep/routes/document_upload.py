@@ -252,3 +252,38 @@ def upload_document(username, request, parsable):
             abort(502)
 
     return "", 200
+
+
+@document_upload_route.route("/delete_document/<int:doc_id>", methods=["DELETE"])
+@token_required
+def delete_document(username, doc_id):
+    try:
+        # Fetch document from DB
+        document = Doc.query.filter_by(id=doc_id, owner_username=username).first()
+        if not document:
+            return jsonify({"error": "Document not found or unauthorized"}), 404
+
+        # Delete from ChromaDB collection (assumed to be named after username)
+        collection = client.get_or_create_collection(name=username)
+        all_docs = collection.get(include=["metadatas"])
+        doc_ids = all_docs.get("ids", [])
+
+        ids_to_delete = [
+            doc_id_in_chroma
+            for doc_id_in_chroma, metadata in zip(doc_ids, all_docs['metadatas'])
+            if str(metadata.get("original_doc")) == str(doc_id)
+        ]
+
+        if ids_to_delete:
+            collection.delete(ids=ids_to_delete)
+
+
+        # Delete from SQL database
+        db.session.delete(document)
+        db.session.commit()
+
+        return jsonify({"message": "Document deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 404
