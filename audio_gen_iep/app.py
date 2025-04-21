@@ -7,7 +7,7 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from prometheus_client import start_http_server, Counter, generate_latest, Histogram
 import threading
-
+from flask_cors import CORS
 
 SYNTH_CALLS = Counter(
     'gpt_iep_synthesize_calls_total',
@@ -29,6 +29,7 @@ SYNTH_ERRORS = Counter(
 load_dotenv()
 app = Flask(__name__)
 
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
