@@ -265,17 +265,18 @@ def delete_document(username, doc_id):
 
         # Delete from ChromaDB collection (assumed to be named after username)
         collection = client.get_or_create_collection(name=username)
-        all_docs = collection.get(include=["metadatas", "ids"])
+        all_docs = collection.get(include=["metadatas"])
+        doc_ids = all_docs.get("ids", [])
 
-        # Collect matching document IDs in ChromaDB
         ids_to_delete = [
             doc_id_in_chroma
-            for doc_id_in_chroma, metadata in zip(all_docs['ids'], all_docs['metadatas'])
+            for doc_id_in_chroma, metadata in zip(doc_ids, all_docs['metadatas'])
             if str(metadata.get("original_doc")) == str(doc_id)
         ]
 
         if ids_to_delete:
             collection.delete(ids=ids_to_delete)
+
 
         # Delete from SQL database
         db.session.delete(document)
