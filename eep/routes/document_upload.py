@@ -20,7 +20,11 @@ from routes.auth_routes import token_required
 from database.vectordb import client
 from tools.file_processor_service import FileProcessorService
 from chromadb.utils import embedding_functions
+from numpy import dot
+from numpy.linalg import norm
 
+def cosine_similarity(a, b):
+    return dot(a, b) / (norm(a) * norm(b))
 GPT_IEP = os.getenv("GPT_IEP", "http://gpt:5002")
 EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "http://embeddings:5002")
 
@@ -259,6 +263,7 @@ def upload_document(username, request, parsable):
 def fetch_notes_by_document(username):
     """
     Fetch notes associated with a specific document from ChromaDB.
+    a document is given and then all associated notes are returned.
     """
     try:
         doc_name = request.args.get('doc_name')
@@ -285,3 +290,62 @@ def fetch_notes_by_document(username):
     except Exception as e:
         logging.error(f"Error fetching notes for document {doc_name}: {e}")
         return jsonify({"error": "Failed to fetch notes"}), 500
+    
+@document_upload_route.route('/fetch_notes', methods=['POST'])
+@token_required
+def search_similar_note(username):
+    """
+    Search for the most similar note to a user-provided query and return the associated document.
+    """
+    try:
+        # Step 1: Get the query from the request
+        data = request.get_json()
+        query = data.get('query')
+        if not query:
+            return jsonify({"error": "note is required"}), 400
+
+        # Step 2: Generate embedding for the query
+        response = requests.post(
+            f"{EMBEDDINGS_IEP}/generate_embeddings",
+            json={"text": query}
+        )
+        response.raise_for_status()
+        query_embedding = response.json()["embedding"]
+
+        # Step 3: Search ChromaDB for the most similar note
+        collection = client.get_or_create_collection(name=username)
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=1,  # Get the top 1 most similar note
+            include=["documents", "metadatas", "distances"]
+        )
+
+        if not results["documents"]:
+            return jsonify({"error": "No similar notes found"}), 404
+
+        # Step 4: Extract the most similar note and its metadata
+        most_similar_note = results["documents"][0][0]
+        metadata = results["metadatas"][0][0]
+        similarity_score = results["distances"][0][0]
+        original_doc_id = metadata["original_doc"]
+
+        # Step 5: Retrieve the associated document from the SQL database
+        doc = Doc.query.filter_by(id=original_doc_id, owner_username=username).first()
+        if not doc:
+            return jsonify({"error": "Associated document not found or access denied"}), 404
+
+        # Step 6: Return the most similar note and associated document details
+        return jsonify({
+            "query": query,
+            "most_similar_note": most_similar_note,
+            "similarity_score": similarity_score,
+            "associated_document": {
+                "id": doc.id,
+                "title": doc.title,
+                "owner_username": doc.owner_username
+            }
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Error searching for similar note: {e}")
+        return jsonify({"error": "Failed to search for similar note"}), 500
