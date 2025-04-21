@@ -24,6 +24,10 @@ app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
 app.register_blueprint(quiz_routes)
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
 @app.route('/', methods=['GET'])
 def healthcheck():
     return jsonify({"status": "ok"}), 200
