@@ -4,6 +4,9 @@ metadata:
   name: my-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: $http_origin";
+      more_set_headers "Access-Control-Allow-Credentials: true";
 spec:
   ingressClassName: nginx
   rules:
