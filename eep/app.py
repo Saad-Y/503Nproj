@@ -16,7 +16,7 @@ CORS(app, resources={r"/*": {"origins": [
             "http://localhost:3001",
             "http://0.0.0.0:80",
             "http://localhost:80",
-            "http://frontend:80"
+            "http://frontend:80",
             "http://localhost",
             "https://20.233.221.128",
             "https://white-forest-06d13af00.6.azurestaticapps.net"
