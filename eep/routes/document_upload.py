@@ -19,6 +19,7 @@ from model.doc import Doc
 from routes.auth_routes import token_required
 from database.vectordb import client
 from tools.file_processor_service import FileProcessorService
+from chromadb.utils import embedding_functions
 
 GPT_IEP = os.getenv("GPT_IEP", "http://gpt:5002")
 EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "http://embeddings:5002")
@@ -222,7 +223,7 @@ def upload_document(username, request, parsable):
     data = text_splitter.split_documents([document])
     collection = client.get_or_create_collection(name=username)
     try:
-        doc = Doc(owner_username=username, title=file_path)
+        doc = Doc(owner_username=username, title=filename)
         db.session.add(doc)
         db.session.commit()
     except Exception as e:
@@ -252,3 +253,35 @@ def upload_document(username, request, parsable):
             abort(502)
 
     return "", 200
+
+@document_upload_route.route('/fetch_notes', methods=['GET'])
+@token_required
+def fetch_notes_by_document(username):
+    """
+    Fetch notes associated with a specific document from ChromaDB.
+    """
+    try:
+        doc_name = request.args.get('doc_name')
+        if not doc_name:
+            return jsonify({"error": "Document name is required"}), 400
+        
+        # Check if the document exists in the SQL database
+        # and is owned by the user
+        doc = Doc.query.filter_by(owner_username=username, title=doc_name).first()
+        if not doc:
+                return jsonify({"error": "Document not found or access denied"}), 404
+        
+        # Query ChromaDB for embeddings with the document name as metadata
+        collection = client.get_or_create_collection(name=username)
+        results = collection.get(where={"original_doc": doc.id})
+
+        if not results["documents"]:
+            return jsonify({"error": "No notes found for this document"}), 404
+
+        # Return the notes (original text chunks)
+        notes = results["documents"]
+        return jsonify({"notes": notes}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching notes for document {doc_name}: {e}")
+        return jsonify({"error": "Failed to fetch notes"}), 500
