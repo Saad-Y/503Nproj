@@ -19,9 +19,15 @@ from model.doc import Doc
 from routes.auth_routes import token_required
 from database.vectordb import client
 from tools.file_processor_service import FileProcessorService
+from chromadb.utils import embedding_functions
+from numpy import dot
+from numpy.linalg import norm
 
+def cosine_similarity(a, b):
+    return dot(a, b) / (norm(a) * norm(b))
 GPT_IEP = os.getenv("GPT_IEP", "http://gpt:5002")
-EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "http://embeddings:5002")
+EMBEDDINGS_IEP = os.getenv("EMBEDDINGS_IEP", "http://embeddings:5001")
+print(EMBEDDINGS_IEP)
 
 document_upload_route = Blueprint('document_upload_routes', __name__)
 
@@ -222,7 +228,7 @@ def upload_document(username, request, parsable):
     data = text_splitter.split_documents([document])
     collection = client.get_or_create_collection(name=username)
     try:
-        doc = Doc(owner_username=username, title=file_path)
+        doc = Doc(owner_username=username, title=filename)
         db.session.add(doc)
         db.session.commit()
     except Exception as e:
@@ -252,6 +258,7 @@ def upload_document(username, request, parsable):
             abort(502)
 
     return "", 200
+
 
 
 @document_upload_route.route("/delete_document/<int:doc_id>", methods=["DELETE"])
@@ -287,3 +294,125 @@ def delete_document(username, doc_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 404
+
+@document_upload_route.route('/fetch_notes', methods=['GET'])
+@token_required
+def fetch_notes_by_document(username):
+    """
+    Fetch notes associated with a specific document from ChromaDB.
+    a document is given and then all associated notes are returned.
+    """
+    try:
+        doc_name = request.args.get('doc_name')
+        if not doc_name:
+            return jsonify({"error": "Document name is required"}), 400
+        
+        # Check if the document exists in the SQL database
+        # and is owned by the user
+        doc = Doc.query.filter_by(owner_username=username, title=doc_name).first()
+        if not doc:
+                return jsonify({"error": "Document not found or access denied"}), 404
+        
+        # Query ChromaDB for embeddings with the document name as metadata
+        collection = client.get_or_create_collection(name=username)
+        results = collection.get(where={"original_doc": doc.id})
+
+        if not results["documents"]:
+            return jsonify({"error": "No notes found for this document"}), 404
+
+        # Step 4: Extract and sort notes by index
+        raw_notes = results["documents"]
+        raw_ids = results["ids"]
+
+        # Pair notes with their indices
+        notes_with_indices = []
+        for note, entry_id in zip(raw_notes, raw_ids):
+            # Extract the index from the entry_id (e.g., "example.pdf-0" -> 0)
+            index = int(entry_id.split("-")[-1])
+            notes_with_indices.append((index, note))
+
+        # Sort notes by index
+        notes_with_indices.sort(key=lambda x: x[0])
+
+        # Remove overlaps and structure the notes
+        structured_notes = []
+        for i, (_, note) in enumerate(notes_with_indices):
+            if i == 0:
+                # Add the first chunk as is
+                structured_notes.append(note)
+            else:
+                # Remove the 200-character overlap
+                previous_note = structured_notes[-1]
+                overlap_length = 200
+                structured_notes[-1] = previous_note[:-overlap_length]  # Trim overlap from the previous note
+                structured_notes.append(note)
+
+
+        # Step 5: Combine structured notes into a single response
+        combined_notes = "\n\n".join(structured_notes)
+
+        return jsonify({"notes": combined_notes}), 200
+
+
+    except Exception as e:
+        logging.error(f"Error fetching notes for document {doc_name}: {e}")
+        return jsonify({"error": "Failed to fetch notes"}), 500
+    
+@document_upload_route.route('/fetch_notes', methods=['POST'])
+@token_required
+def search_similar_note(username):
+    """
+    Search for the most similar note to a user-provided query and return the associated document.
+    """
+    try:
+        # Step 1: Get the query from the request
+        data = request.get_json()
+        query = data.get('query')
+        if not query:
+            return jsonify({"error": "note is required"}), 400
+
+        # Step 2: Generate embedding for the query
+        response = requests.post(
+            f"{EMBEDDINGS_IEP}/generate_embeddings",
+            json={"text": query}
+        )
+        response.raise_for_status()
+        query_embedding = response.json()["embedding"]
+
+        # Step 3: Search ChromaDB for the most similar note
+        collection = client.get_or_create_collection(name=username)
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=1,  # Get the top 1 most similar note
+            include=["documents", "metadatas", "distances"]
+        )
+
+        if not results["documents"]:
+            return jsonify({"error": "No similar notes found"}), 404
+
+        # Step 4: Extract the most similar note and its metadata
+        most_similar_note = results["documents"][0][0]
+        metadata = results["metadatas"][0][0]
+        similarity_score = results["distances"][0][0]
+        original_doc_id = metadata["original_doc"]
+
+        # Step 5: Retrieve the associated document from the SQL database
+        doc = Doc.query.filter_by(id=original_doc_id, owner_username=username).first()
+        if not doc:
+            return jsonify({"error": "Associated document not found or access denied"}), 404
+
+        # Step 6: Return the most similar note and associated document details
+        return jsonify({
+            "query": query,
+            "most_similar_note": most_similar_note,
+            "similarity_score": similarity_score,
+            "associated_document": {
+                "id": doc.id,
+                "title": doc.title,
+                "owner_username": doc.owner_username
+            }
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Error searching for similar note: {e}")
+        return jsonify({"error": "Failed to search for similar note"}), 500
