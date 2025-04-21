@@ -90,7 +90,6 @@ jobs:
       run: |
         kubectl apply -f k8s/cluster-issuer.yaml
         kubectl apply -f k8s/my-ingress.yaml
-        kubectl apply -f k8s/prometheus-ingress.yaml
         kubectl apply -f k8s/audio-gen-deployment.yaml
         kubectl apply -f k8s/audio_gen-service.yaml
         kubectl apply -f k8s/eep-deployment.yaml
