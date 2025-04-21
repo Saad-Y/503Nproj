@@ -18,15 +18,13 @@ CORS(app, resources={r"/*": {"origins": [
             "http://localhost:80",
             "http://frontend:80"
             "http://localhost",
-            "http://20.233.221.128"
+            "https://20.233.221.128",
+            "https://white-forest-06d13af00.6.azurestaticapps.net"
         ]}}, supports_credentials=True)
 app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
 app.register_blueprint(quiz_routes)
 
-from werkzeug.middleware.proxy_fix import ProxyFix
-
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 @app.route('/', methods=['GET'])
 def healthcheck():

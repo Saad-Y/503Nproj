@@ -45,7 +45,7 @@ jobs:
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest
 
         docker build --no-cache \
-          --build-arg REACT_APP_API_URL=http://20.233.221.128/api/eep \
+          --build-arg REACT_APP_API_URL=https://20.233.221.128/api/eep \
           -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest \
           ./frontend
 
