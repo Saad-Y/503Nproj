@@ -283,9 +283,39 @@ def fetch_notes_by_document(username):
         if not results["documents"]:
             return jsonify({"error": "No notes found for this document"}), 404
 
-        # Return the notes (original text chunks)
-        notes = results["documents"]
-        return jsonify({"notes": notes}), 200
+        # Step 4: Extract and sort notes by index
+        raw_notes = results["documents"]
+        raw_ids = results["ids"]
+
+        # Pair notes with their indices
+        notes_with_indices = []
+        for note, entry_id in zip(raw_notes, raw_ids):
+            # Extract the index from the entry_id (e.g., "example.pdf-0" -> 0)
+            index = int(entry_id.split("-")[-1])
+            notes_with_indices.append((index, note))
+
+        # Sort notes by index
+        notes_with_indices.sort(key=lambda x: x[0])
+
+        # Remove overlaps and structure the notes
+        structured_notes = []
+        for i, (_, note) in enumerate(notes_with_indices):
+            if i == 0:
+                # Add the first chunk as is
+                structured_notes.append(note)
+            else:
+                # Remove the 200-character overlap
+                previous_note = structured_notes[-1]
+                overlap_length = 200
+                structured_notes[-1] = previous_note[:-overlap_length]  # Trim overlap from the previous note
+                structured_notes.append(note)
+
+
+        # Step 5: Combine structured notes into a single response
+        combined_notes = "\n\n".join(structured_notes)
+
+        return jsonify({"notes": combined_notes}), 200
+
 
     except Exception as e:
         logging.error(f"Error fetching notes for document {doc_name}: {e}")
