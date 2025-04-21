@@ -17,7 +17,8 @@ CORS(app, resources={r"/*": {"origins": [
             "http://0.0.0.0:80",
             "http://localhost:80",
             "http://frontend:80"
-            "http://localhost"
+            "http://localhost",
+            "http://20.233.221.128"
         ]}}, supports_credentials=True)
 app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
