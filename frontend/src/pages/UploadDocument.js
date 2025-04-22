@@ -48,6 +48,7 @@ export default function UploadDocument({ SERVER_URL }) {
         setMessage('Upload failed.');
       }
     } catch (error) {
+      console.log(error);
       setMessage('Upload failed.');
     } finally {
       setUploading(false);
