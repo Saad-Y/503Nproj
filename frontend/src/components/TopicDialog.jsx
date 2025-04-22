@@ -22,7 +22,7 @@ function cleanAndExtractJSON(rawQuiz) {
   const match = cleaned.match(/\[\s*{[\s\S]*?}\s*\]/);
 
   if (!match) throw new Error("No valid JSON array found.");
-
+  const safe = match[0].replace(/\\(?!["\\/bfnrtu])/g, '');
   return JSON.parse(match[0]);
 }
 
