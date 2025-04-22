@@ -201,11 +201,6 @@ def upload_document(username, request, parsable):
             logging.error(f'Error saving file: {filename}: {e}')
             abort(503)
 
-        # Check the file type using magic
-        if not allowed_file_type(file_path):
-            os.remove(file_path)
-            logging.warning(f'Filetype of {filename} not allowed')
-            abort(400)
 
     else:
         abort(400)
