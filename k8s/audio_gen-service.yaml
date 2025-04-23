@@ -12,5 +12,8 @@ spec:
     - name: "5003"
       port: 5003
       targetPort: 5003
+    - name: "metrics"
+      port: 8000
+      targetPort: 8000
   selector:
     io.kompose.service: audio-gen

@@ -40,10 +40,15 @@ export default function UploadDocument({ SERVER_URL }) {
       //const result = await response.json();
       if (response.ok) {
         setMessage('Upload successful!');
-      } else {
+      } 
+      else if (response.status === 413) {
+        setMessage('Upload failed: File too large.');
+      }
+      else {
         setMessage('Upload failed.');
       }
     } catch (error) {
+      console.log(error);
       setMessage('Upload failed.');
     } finally {
       setUploading(false);

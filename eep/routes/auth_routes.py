@@ -81,9 +81,8 @@ def authenticate():
     resp = make_response({"message": "authentication successful"})
     resp.set_cookie('learnify-token', token, 
                         httponly=True, #to prevent javascript from accessing cookie
-                        secure=True,    # Only send cookie over HTTPS
-                        samesite='None' 
-                        )
+                        secure=True,         
+                        samesite='None')
     logging.info(f'Login successful by {username}')
     return resp
 
@@ -124,7 +123,7 @@ def signup():
         resp = make_response({"message": "Signup successful"})
         resp.set_cookie('learnify-token', token,
                         httponly=True,
-                        secure=True,
+                        secure=True,         
                         samesite='None')
         logging.info(f"User registered: {username}")
         return resp

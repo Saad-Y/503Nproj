@@ -37,7 +37,7 @@ spec:
             - name: GPT_IEP
               value: 'http://gpt:5002'
             - name: AUDIO_GEN_IEP
-              value: 'https://audio-gen:5003'
+              value: 'http://audio-gen:5003'
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:

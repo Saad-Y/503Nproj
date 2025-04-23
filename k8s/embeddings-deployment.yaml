@@ -17,6 +17,9 @@ spec:
       annotations:
         kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f docker-compose.yml
         kompose.version: 1.35.0 (9532ceef3)
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
       labels:
         io.kompose.service: embeddings
     spec:
@@ -31,5 +34,7 @@ spec:
           name: embeddings-iep
           ports:
             - containerPort: 5001
+              protocol: TCP
+            - containerPort: 8000
               protocol: TCP
       restartPolicy: Always

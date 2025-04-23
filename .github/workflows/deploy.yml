@@ -88,6 +88,7 @@ jobs:
 
     - name: Deploy to AKS
       run: |
+        kubectl apply -f k8s/cluster-issuer.yaml
         kubectl apply -f k8s/my-ingress.yaml
         kubectl apply -f k8s/audio-gen-deployment.yaml
         kubectl apply -f k8s/audio_gen-service.yaml
@@ -95,7 +96,10 @@ jobs:
         kubectl apply -f k8s/eep-service.yaml
         kubectl apply -f k8s/embeddings-deployment.yaml
         kubectl apply -f k8s/embeddings-service.yaml
-        kubectl apply -f k8s/frontend-deployment.yaml
-        kubectl apply -f k8s/frontend-service.yaml
         kubectl apply -f k8s/gpt-deployment.yaml
         kubectl apply -f k8s/gpt-service.yaml
+        kubectl apply -f k8s/prometheus-cm0-configmap.yaml
+        kubectl apply -f k8s/prometheus-deployment.yaml
+        kubectl apply -f k8s/prometheus-service.yaml
+        kubectl apply -f k8s/prometheus-rbac.yaml
+        

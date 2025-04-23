@@ -12,5 +12,8 @@ spec:
     - name: "5002"
       port: 5002
       targetPort: 5002
+    - name: "metrics"
+      port: 8000
+      targetPort: 8000
   selector:
     io.kompose.service: gpt

@@ -117,7 +117,26 @@ export default function Dashboard({ SERVER_URL }) {
             </CardContent>
           </Card>
         </Grid>
+        <Grid item xs={12} md={10} lg={8}>
+        <Card className="dashboard-card">
+          <CardContent>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              📂 Manage Documents
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              fullWidth
+              onClick={() => navigate('/all-documents')}
+              sx={{ mt: 2 }}
+            >
+              View All Documents
+            </Button>
+          </CardContent>
+        </Card>
       </Grid>
+      </Grid>
+      
       <TopicDialog setTopic={setTopic} topic={topic} navigate={navigate} setTopicOpen={setTopicOpen} topicOpen={topicOpen} SERVER_URL={SERVER_URL}/>
     </Box>
   );
