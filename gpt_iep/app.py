@@ -51,7 +51,6 @@ import base64
 import requests
 import openai  # assumes openai.api_key is already set somewhere
 
-app = Flask(__name__)
 
 @app.route("/get_image_description", methods=['POST'])
 def get_image_description():
