@@ -50,4 +50,29 @@ def send_to_api(prompt , api_key):
                 "type": "web_search"
             }]
     )
+    response = extract_text_from_response(response)
     return response
+
+def get_modules(api_key, url):
+
+    prompt = (
+ str(f"""   what are the modules for this course {url} ? please state for each module what are the covered topics and what will the student understand from these topics.
+  Please double check of the url returned, you are returning broken ones
+  Don't guess the URLs, actually fetch the page and extract them directly from the HTML or navigation list
+  please return them in this format in json: [
+  {
+    "unit_name": 
+    "unit_url": ,
+    "unit_summary": 
+    "learning_objectives": [
+      "Understand vector representation and operations",
+      "Apply dot and cross products",
+      "Visualize vectors in 2D and 3D space"
+    ]
+  },
+  ...
+] """)
+    response = send_to_api(prompt, api_key)
+
+
+)
