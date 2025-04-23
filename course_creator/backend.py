@@ -35,3 +35,19 @@ def get_urls(response_parsed):
   for r in response_parsed:
       urls.append(response_parsed[r]['url'])
   return urls
+
+from openai import OpenAI
+def send_to_api(prompt , api_key):
+    
+    client = OpenAI(api_key=api_key)
+
+    # Send the prompt to the ChatGPT API
+    response = client.responses.create(
+        model="gpt-4o",  # or "gpt-3.5-turbo" if you prefer
+        input = prompt,
+        tools=[
+            {
+                "type": "web_search"
+            }]
+    )
+    return response
