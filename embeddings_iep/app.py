@@ -65,7 +65,8 @@ def generate_embeddings():
 
         return jsonify({"embedding": embedding}), 200
 
-   
+
+
 
 @app.route("/metrics")
 def metrics():
