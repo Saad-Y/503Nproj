@@ -56,23 +56,49 @@ def send_to_api(prompt , api_key):
 def get_modules(api_key, url):
 
     prompt = (
- str(f"""   what are the modules for this course {url} ? please state for each module what are the covered topics and what will the student understand from these topics.
-  Please double check of the url returned, you are returning broken ones
-  Don't guess the URLs, actually fetch the page and extract them directly from the HTML or navigation list
-  please return them in this format in json: [
-  {
-    "unit_name": 
-    "unit_url": ,
-    "unit_summary": 
-    "learning_objectives": [
-      "Understand vector representation and operations",
-      "Apply dot and cross products",
-      "Visualize vectors in 2D and 3D space"
-    ]
-  },
-  ...
-] """)
+            str(f"""   what are the modules for this course {url} ? please state for each module what are the covered topics and what will the student understand from these topics.
+            Please double check of the url returned, you are returning broken ones
+            Don't guess the URLs, actually fetch the page and extract them directly from the HTML or navigation list
+            please return them in this format in json: [
+            {
+                "unit_name": 
+                "unit_url": ,
+                "unit_summary": 
+                "learning_objectives": [
+                "Understand vector representation and operations",
+                "Apply dot and cross products",
+                "Visualize vectors in 2D and 3D space"
+                ]
+            },
+            ...
+            ] """))
     response = send_to_api(prompt, api_key)
+    return response
 
 
-)
+def get_urls(api_key , student_status , course , platforms):
+    """
+    student_status: a string that describes the student status, like computer science student
+    course : common name for course example calculus 3
+    platforms : a list of platforms to search in, like udemy, coursera, edx
+    """
+    def parse_platforms(platform_list):
+        return ', '.join(platform_list)
+    platforms = parse_platforms(platforms)
+    prompt=(
+        f"im a , {student_status} student. Use websearch so you can compelete the following request : "
+        f"i want you to recommend the best {course} course on EACH of the following platforms: {platforms} "
+        f"Please return the link for each of the best course of each platform in json format"
+        """ here is an example: 
+  "Khan Academy": {
+    "course_name": "Multivariable Calculus",
+    "url": "https://www.khanacademy.org/math/multivariable-calculus"
+  }
+    """
+    )
+    response = send_to_api(prompt, api_key)
+    urls = get_urls(response)
+    return urls
+
+
+
