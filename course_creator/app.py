@@ -7,7 +7,7 @@ import threading
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-from .backend import get_urls, async_get_modules
+from backend import get_urls, async_get_modules
 import asyncio
 load_dotenv()
 
@@ -56,7 +56,7 @@ async def generate_course():
     tasks = [async_get_modules(api_key, url) for url in urls]
     for future in asyncio.as_completed(tasks):
         result = await future
-        yield result  # you can stream this to frontend
+        return result  # you can stream this to frontend
 
 
 @app.route("/metrics")
@@ -69,4 +69,4 @@ def start_servers():
 
 if __name__ == '__main__':
     server_thread = threading.Thread(target=start_servers).start()
-    app.run(host="0.0.0.0", port=5002)
+    app.run(host="0.0.0.0", port=5004)
