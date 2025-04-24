@@ -58,20 +58,20 @@ services:
       retries: 20
       start_period: 10s
 
-  # frontend:
-  #   env_file:
-  #     - ./.env
-  #   build:
-  #     context: ./frontend
+  frontend:
+    env_file:
+      - ./.env
+    build:
+      context: ./learning-platform
 
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - my_network
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
 
-  #   depends_on:
-  #     eep:
-  #       condition: service_healthy
+    depends_on:
+      eep:
+        condition: service_healthy
 
   prometheus:
     image: prom/prometheus
