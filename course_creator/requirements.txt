@@ -1,0 +1,7 @@
+openai
+flask
+flask-cors
+azure-identity
+azure-keyvault-secrets
+prometheus-client
+python-dotenv

@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify 
 from flask_cors import CORS
-import openai
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from prometheus_client import start_http_server, Counter, generate_latest, Histogram
@@ -8,9 +7,6 @@ import threading
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-import base64
-import requests
-import openai  # assumes openai.api_key is already set somewhere
 from .backend import get_urls, async_get_modules
 import asyncio
 load_dotenv()
