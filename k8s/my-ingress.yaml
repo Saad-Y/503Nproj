@@ -4,7 +4,7 @@ metadata:
   name: my-ingress
   annotations:
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://white-forest-06d13af00.6.azurestaticapps.net"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "~^https://(white-forest-06d13af00\.6\.azurestaticapps\.net|learnify503n\.space)$"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type"

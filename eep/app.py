@@ -19,7 +19,8 @@ CORS(app, resources={r"/*": {"origins": [
             "http://frontend:80",
             "http://localhost",
             "https://20.233.221.128",
-            "https://white-forest-06d13af00.6.azurestaticapps.net"
+            "https://white-forest-06d13af00.6.azurestaticapps.net",
+            "https://learnify503n.space"
         ]}}, supports_credentials=True)
 app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
