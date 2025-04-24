@@ -44,6 +44,9 @@ jobs:
         docker build --no-cache -t ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest ./embeddings_iep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest
 
+        docker build --no-cache -t ${{ secrets.ACR_NAME }}.azurecr.io/course-creator:latest ./course_creator
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/course-creator:latest
+
         docker build --no-cache \
           --build-arg REACT_APP_API_URL=https://20.233.221.128/api/eep \
           -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest \
@@ -64,7 +67,7 @@ jobs:
 
     - name: Force restart of deployment
       run: |
-        for d in frontend eep gpt embeddings audio-gen; do
+        for d in frontend eep gpt embeddings audio-gen course-creator; do
           kubectl rollout restart deployment $d
         done
 
@@ -90,6 +93,8 @@ jobs:
       run: |
         kubectl apply -f k8s/cluster-issuer.yaml
         kubectl apply -f k8s/my-ingress.yaml
+        kubectl apply -f k8s/course_creator-deployment.yaml
+        kubectl apply -f k8s/course_creator-service.yaml
         kubectl apply -f k8s/audio-gen-deployment.yaml
         kubectl apply -f k8s/audio_gen-service.yaml
         kubectl apply -f k8s/eep-deployment.yaml

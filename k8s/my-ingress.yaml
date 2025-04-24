@@ -48,6 +48,13 @@ spec:
                 name: embeddings
                 port:
                   number: 5001
+          - path: /api/course-creator(/|$)(.*)    
+            pathType: Prefix
+            backend:
+              service:
+                name: course-creator              
+                port:
+                  number: 5004
           - path: /()(.*)  # frontend fallback
             pathType: Prefix
             backend:

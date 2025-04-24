@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml
+    kompose.version: 1.35.0
+  labels:
+    io.kompose.service: course-creator
+  name: course-creator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: course-creator
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml
+        kompose.version: 1.35.0
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+      labels:
+        io.kompose.service: course-creator
+    spec:
+      containers:
+        - name: course-creator
+          image: learnifyacr.azurecr.io/course-creator:latest
+          ports:
+            - containerPort: 5004
+              protocol: TCP
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: api-key
+      restartPolicy: Always
