@@ -1,25 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// Mock authentication - in a real app, this would verify the user's session
-const getUsername = () => "demo_user"
-
 export async function POST(request: NextRequest) {
   try {
-    const username = getUsername()
     const data = await request.json()
 
+    // Validate required fields
     if (!data.document_id && !data.topic) {
       return NextResponse.json({ error: "Either document_id or topic is required" }, { status: 400 })
     }
 
-    const response = await fetch(`${process.env.BACKEND_URL}/generate_quiz`, {
+    const response = await fetch(`${process.env.DOCUMENTS_API_URL}/generate_quiz`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.API_TOKEN}`,
-        "X-Username": username,
         "Content-Type": "application/json",
+        Cookie: request.headers.get("cookie") || "",
       },
       body: JSON.stringify(data),
+      credentials: "include",
     })
 
     if (!response.ok) {

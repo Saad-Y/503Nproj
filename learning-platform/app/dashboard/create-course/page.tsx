@@ -2,8 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,7 @@ import { toast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function CreateCoursePage() {
+  const router = useRouter()
   const [courseName, setCourseName] = useState("")
   const [degree, setDegree] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -22,6 +24,26 @@ export default function CreateCoursePage() {
     EdX: false,
     Coursera: false,
   })
+
+  // Check authentication on page load
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/auth_check`, {
+          credentials: "include", // Important for cookies
+        })
+
+        if (!response.ok) {
+          router.push("/auth")
+        }
+      } catch (error) {
+        console.error("Auth check error:", error)
+        router.push("/auth")
+      }
+    }
+
+    checkAuth()
+  }, [router])
 
   const handlePlatformChange = (platform: string) => {
     setPlatforms({
@@ -79,6 +101,7 @@ export default function CreateCoursePage() {
           course: courseName,
           platforms: selectedPlatforms,
         }),
+        credentials: "include",
       })
 
       if (!response.ok) {

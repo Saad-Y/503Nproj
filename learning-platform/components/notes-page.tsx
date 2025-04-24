@@ -24,81 +24,6 @@ interface Note {
   owner_username: string
 }
 
-// Mock data for testing without backend
-const MOCK_NOTES: Note[] = [
-  { id: "1", title: "Introduction to React.pdf", owner_username: "demo_user" },
-  { id: "2", title: "JavaScript Fundamentals.docx", owner_username: "demo_user" },
-  { id: "3", title: "CSS Grid Layout.txt", owner_username: "demo_user" },
-]
-
-const MOCK_NOTE_CONTENT = `# Introduction to React
-
-React is a JavaScript library for building user interfaces. It is maintained by Facebook and a community of individual developers and companies.
-
-## Key Concepts
-
-### Components
-
-Components are the building blocks of any React application. A component is a self-contained module that renders some output.
-
-### JSX
-
-JSX is a syntax extension to JavaScript. It is similar to a template language, but it has full power of JavaScript.
-
-### Props
-
-Props are inputs to components. They are data passed down from a parent component to a child component.
-
-### State
-
-State is a data structure that starts with a default value when a component mounts. It may be mutated across time, mostly as a result of user events.
-
-## Getting Started
-
-To create a new React application, you can use Create React App:
-
-\`\`\`
-npx create-react-app my-app
-cd my-app
-npm start
-\`\`\`
-
-This will create a new React application and start a development server.
-`
-
-const MOCK_QUIZ = [
-  {
-    question: "What is React?",
-    options: [
-      "A JavaScript framework for building user interfaces",
-      "A JavaScript library for building user interfaces",
-      "A programming language",
-      "A database management system",
-    ],
-    answer: 1,
-  },
-  {
-    question: "Who maintains React?",
-    options: ["Google", "Microsoft", "Facebook and a community of developers", "Amazon"],
-    answer: 2,
-  },
-  {
-    question: "What are the building blocks of React applications?",
-    options: ["Functions", "Classes", "Components", "Modules"],
-    answer: 2,
-  },
-  {
-    question: "What is JSX?",
-    options: [
-      "A programming language",
-      "A syntax extension to JavaScript",
-      "A React component",
-      "A database query language",
-    ],
-    answer: 1,
-  },
-]
-
 export function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState(true)
@@ -124,11 +49,16 @@ export function NotesPage() {
   const fetchNotes = async () => {
     try {
       setLoading(true)
-      // Simulate API call with mock data
-      setTimeout(() => {
-        setNotes(MOCK_NOTES)
-        setLoading(false)
-      }, 1000)
+      const response = await fetch("/api/documents", {
+        credentials: "include",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch notes")
+      }
+
+      const data = await response.json()
+      setNotes(data)
     } catch (error) {
       console.error("Error fetching notes:", error)
       toast({
@@ -136,6 +66,7 @@ export function NotesPage() {
         description: "Failed to load your notes. Please try again.",
         variant: "destructive",
       })
+    } finally {
       setLoading(false)
     }
   }
@@ -158,20 +89,25 @@ export function NotesPage() {
         })
       }, 200)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const formData = new FormData()
+      formData.append("file", file)
+
+      // Determine if file is parsable based on extension
+      const isParsable = /\.(txt|pdf|docx)$/i.test(file.name)
+      const endpoint = isParsable ? "/api/upload_document_parsable" : "/api/upload_document_non_parsable"
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      })
 
       clearInterval(progressInterval)
       setUploadProgress(100)
 
-      // Add the new note to the list
-      const newNote: Note = {
-        id: (notes.length + 1).toString(),
-        title: file.name,
-        owner_username: "demo_user",
+      if (!response.ok) {
+        throw new Error("Failed to upload file")
       }
-
-      setNotes([...notes, newNote])
 
       toast({
         title: "Success",
@@ -180,6 +116,9 @@ export function NotesPage() {
 
       // Reset file input
       if (fileInputRef.current) fileInputRef.current.value = ""
+
+      // Refresh notes list
+      fetchNotes()
     } catch (error) {
       console.error("Error uploading file:", error)
       toast({
@@ -195,16 +134,22 @@ export function NotesPage() {
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      const response = await fetch(`/api/delete_document/${noteId}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
 
-      // Update notes list
-      setNotes(notes.filter((note) => note.id !== noteId))
+      if (!response.ok) {
+        throw new Error("Failed to delete note")
+      }
 
       toast({
         title: "Success",
         description: "Note deleted successfully!",
       })
+
+      // Update notes list
+      setNotes(notes.filter((note) => note.id !== noteId))
     } catch (error) {
       console.error("Error deleting note:", error)
       toast({
@@ -220,9 +165,16 @@ export function NotesPage() {
       setSelectedNote(note)
       setIsNoteOpen(true)
 
-      // Simulate API call with mock data
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      setNoteContent(MOCK_NOTE_CONTENT)
+      const response = await fetch(`/api/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
+        credentials: "include",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch note content")
+      }
+
+      const data = await response.json()
+      setNoteContent(data.notes)
     } catch (error) {
       console.error("Error fetching note content:", error)
       toast({
@@ -238,43 +190,45 @@ export function NotesPage() {
       setSelectedNote(note)
       setIsGeneratingAudio(true)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // First, fetch the note content if not already loaded
+      if (!noteContent) {
+        const response = await fetch(`/api/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
+          credentials: "include",
+        })
 
-      // Create a dummy audio blob
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const oscillator = audioContext.createOscillator()
-      const dest = audioContext.createMediaStreamDestination()
-      oscillator.connect(dest)
-      oscillator.type = "sine"
-      oscillator.frequency.value = 440
-      oscillator.start()
-
-      const mediaRecorder = new MediaRecorder(dest.stream)
-      const chunks: BlobPart[] = []
-
-      mediaRecorder.ondataavailable = (e) => {
-        chunks.push(e.data)
-      }
-
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" })
-        const url = URL.createObjectURL(blob)
-        setAudioSrc(url)
-
-        // Play the audio
-        if (audioRef.current) {
-          audioRef.current.src = url
-          audioRef.current.play()
-          setIsPlaying(true)
+        if (!response.ok) {
+          throw new Error("Failed to fetch note content")
         }
+
+        const data = await response.json()
+        setNoteContent(data.notes)
       }
 
-      mediaRecorder.start()
-      setTimeout(() => {
-        oscillator.stop()
-        mediaRecorder.stop()
-      }, 2000)
+      // Then generate audio from the content
+      const audioResponse = await fetch("/api/synthesize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: noteContent }),
+        credentials: "include",
+      })
+
+      if (!audioResponse.ok) {
+        throw new Error("Failed to generate audio")
+      }
+
+      // Create blob URL from audio response
+      const blob = await audioResponse.blob()
+      const url = URL.createObjectURL(blob)
+      setAudioSrc(url)
+
+      // Play the audio
+      if (audioRef.current) {
+        audioRef.current.src = url
+        audioRef.current.play()
+        setIsPlaying(true)
+      }
 
       toast({
         title: "Success",
@@ -297,10 +251,21 @@ export function NotesPage() {
       setSelectedNote(note)
       setIsGeneratingQuiz(true)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch("/api/generate_quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document_id: note.id }),
+        credentials: "include",
+      })
 
-      setQuiz(MOCK_QUIZ)
+      if (!response.ok) {
+        throw new Error("Failed to generate quiz")
+      }
+
+      const data = await response.json()
+      setQuiz(JSON.parse(data.quiz))
       setIsQuizOpen(true)
 
       toast({

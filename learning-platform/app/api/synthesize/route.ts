@@ -8,12 +8,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 })
     }
 
-    const response = await fetch(`${process.env.BACKEND_URL}/synthesize`, {
+    const response = await fetch(`${process.env.SYNTHESIS_API_URL}/synthesize`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Cookie: request.headers.get("cookie") || "",
       },
       body: JSON.stringify({ text: data.text }),
+      credentials: "include",
     })
 
     if (!response.ok) {

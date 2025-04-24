@@ -1,19 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// Mock authentication - in a real app, this would verify the user's session
-const getUsername = () => "demo_user"
-
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const username = getUsername()
     const id = params.id
 
-    const response = await fetch(`${process.env.BACKEND_URL}/delete_document/${id}`, {
+    const response = await fetch(`${process.env.DOCUMENTS_API_URL}/delete_document/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${process.env.API_TOKEN}`,
-        "X-Username": username,
+        Cookie: request.headers.get("cookie") || "",
       },
+      credentials: "include",
     })
 
     if (!response.ok) {

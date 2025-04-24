@@ -20,16 +20,15 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   // Form states
-  const [loginEmail, setLoginEmail] = useState("")
+  const [loginUsername, setLoginUsername] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
-  const [signupName, setSignupName] = useState("")
-  const [signupEmail, setSignupEmail] = useState("")
+  const [signupUsername, setSignupUsername] = useState("")
   const [signupPassword, setSignupPassword] = useState("")
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!loginEmail || !loginPassword) {
+    if (!loginUsername || !loginPassword) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -40,17 +39,41 @@ export default function AuthPage() {
 
     setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: loginUsername,
+          password: loginPassword,
+        }),
+        credentials: "include", // Important for cookies
+      })
+
+      if (!response.ok) {
+        throw new Error("Login failed")
+      }
+
+      // The backend sets the cookie, so we don't need to handle it here
       router.push("/dashboard")
-    }, 1500)
+    } catch (error) {
+      console.error("Login error:", error)
+      toast({
+        title: "Error",
+        description: "Invalid username or password",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!signupName || !signupEmail || !signupPassword) {
+    if (!signupUsername || !signupPassword) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -61,11 +84,36 @@ export default function AuthPage() {
 
     setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: signupUsername,
+          password: signupPassword,
+        }),
+        credentials: "include", // Important for cookies
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.description || "Signup failed")
+      }
+
+      // The backend sets the cookie, so we don't need to handle it here
       router.push("/dashboard")
-    }, 1500)
+    } catch (error) {
+      console.error("Signup error:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create account",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -91,14 +139,13 @@ export default function AuthPage() {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-username">Username</Label>
                     <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="name@example.com"
+                      id="login-username"
+                      placeholder="johndoe"
                       required
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
+                      value={loginUsername}
+                      onChange={(e) => setLoginUsername(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -158,24 +205,13 @@ export default function AuthPage() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-username">Username</Label>
                     <Input
-                      id="signup-name"
-                      placeholder="John Doe"
+                      id="signup-username"
+                      placeholder="johndoe"
                       required
-                      value={signupName}
-                      onChange={(e) => setSignupName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="name@example.com"
-                      required
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
+                      value={signupUsername}
+                      onChange={(e) => setSignupUsername(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">

@@ -48,7 +48,9 @@ export function NotesDirectory() {
   const fetchNotes = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/documents")
+      const response = await fetch("/api/documents", {
+        credentials: "include",
+      })
       if (!response.ok) throw new Error("Failed to fetch notes")
       const data = await response.json()
       setNotes(data)
@@ -93,6 +95,7 @@ export function NotesDirectory() {
       const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
+        credentials: "include",
       })
 
       clearInterval(progressInterval)
@@ -127,6 +130,7 @@ export function NotesDirectory() {
     try {
       const response = await fetch(`/api/delete_document/${noteId}`, {
         method: "DELETE",
+        credentials: "include",
       })
 
       if (!response.ok) throw new Error("Failed to delete note")
@@ -153,7 +157,9 @@ export function NotesDirectory() {
       setSelectedNote(note)
       setIsNoteOpen(true)
 
-      const response = await fetch(`/api/fetch_notes?doc_name=${encodeURIComponent(note.title)}`)
+      const response = await fetch(`/api/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
+        credentials: "include",
+      })
       if (!response.ok) throw new Error("Failed to fetch note content")
 
       const data = await response.json()
@@ -180,6 +186,7 @@ export function NotesDirectory() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ text: noteContent }),
+        credentials: "include",
       })
 
       if (!response.ok) throw new Error("Failed to generate audio")
@@ -217,6 +224,7 @@ export function NotesDirectory() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ document_id: selectedNote.id }),
+        credentials: "include",
       })
 
       if (!response.ok) throw new Error("Failed to generate quiz")

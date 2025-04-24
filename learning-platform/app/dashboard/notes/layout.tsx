@@ -3,8 +3,10 @@
 import type React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { BookOpen, LayoutDashboard, FileText, MessageSquare, GraduationCap, LogOut } from "lucide-react"
+import { BookOpen, LayoutDashboard, FileText, MessageSquare, GraduationCap, LogOut, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
+import { toast } from "@/components/ui/use-toast"
 
 export default function NotesLayout({
   children,
@@ -12,6 +14,57 @@ export default function NotesLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [username, setUsername] = useState<string | null>(null)
+
+  // Check authentication on page load
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/auth_check`, {
+          credentials: "include", // Important for cookies
+        })
+
+        if (!response.ok) {
+          router.push("/auth")
+          return
+        }
+
+        const data = await response.json()
+        setUsername(data.user)
+      } catch (error) {
+        console.error("Auth check error:", error)
+        router.push("/auth")
+      }
+    }
+
+    checkAuth()
+  }, [router])
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/logout`, {
+        method: "POST",
+        credentials: "include", // Important for cookies
+      })
+
+      if (!response.ok) {
+        throw new Error("Logout failed")
+      }
+
+      router.push("/auth")
+    } catch (error) {
+      console.error("Logout error:", error)
+      toast({
+        title: "Error",
+        description: "Failed to logout. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -32,8 +85,9 @@ export default function NotesLayout({
           </Link>
         </nav>
         <div className="ml-auto flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => router.push("/auth")}>
-            <LogOut className="h-5 w-5" />
+          {username && <span className="text-sm hidden md:inline-block">Hello, {username}</span>}
+          <Button variant="ghost" size="icon" className="rounded-full" onClick={handleLogout} disabled={isLoggingOut}>
+            {isLoggingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             <span className="sr-only">Logout</span>
           </Button>
         </div>
