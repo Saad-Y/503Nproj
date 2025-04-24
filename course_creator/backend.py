@@ -1,5 +1,6 @@
 import json
 from openai import OpenAI
+import asyncio
 def extract_text_from_response(response):
     """
     Extracts the text from the OpenAI RESPONSE API response.
@@ -120,3 +121,15 @@ def generate_course(api_key, student_status , course , platforms):
         modules.append(get_modules(api_key, url))
     return modules
 
+
+async def async_get_modules(api_key, url):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, get_modules, api_key, url)
+
+async def generate_course_async(api_key, student_status, course, platforms):
+    urls = get_urls(api_key, student_status, course, platforms)
+    
+    tasks = [async_get_modules(api_key, url) for url in urls]
+    for future in asyncio.as_completed(tasks):
+        result = await future
+        yield result  # you can stream this to frontend
