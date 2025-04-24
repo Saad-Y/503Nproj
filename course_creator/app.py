@@ -11,44 +11,56 @@ from flask import Flask, request, jsonify
 import base64
 import requests
 import openai  # assumes openai.api_key is already set somewhere
-
-
+from .backend import get_urls, async_get_modules
+import asyncio
 load_dotenv()
 
 # -------------------- Prometheus Metrics --------------------
 
-# Endpoint 1: /get_image_description
-IMG_CALLS = Counter('gpt_iep_image_calls_total', 'Total calls to /get_image_description')
-IMG_LATENCY = Histogram(
-    'gpt_iep_image_latency_seconds',
-    'Latency for /get_image_description',
+# Endpoint 1: /generate_course
+COURSE_CALLS = Counter('gpt_iep_generate_course_calls_total', 'Total calls to /generate_course')
+COURSE_LATENCY = Histogram(
+    'gpt_iep_generate_course_latency_seconds',
+    'Latency for /generate_course',
     buckets=[0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
 )
-IMG_ERRORS = Counter(
-    'gpt_iep_image_errors_total',
-    'Errors in /get_image_description',
+COURSE_ERRORS = Counter(
+    'gpt_iep_generate_course_errors_total',
+    'Errors in /generate_course',
     ['error_type']
 )
 
-# Endpoint 2: /get_response
-RESP_CALLS = Counter('gpt_iep_response_calls_total', 'Total calls to /get_response')
-RESP_LATENCY = Histogram(
-    'gpt_iep_response_latency_seconds',
-    'Latency for /get_response',
-    buckets=[0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
-)
-RESP_ERRORS = Counter(
-    'gpt_iep_response_errors_total',
-    'Errors in /get_response',
-    ['error_type']
-)
 
-openai.api_key = os.getenv('OPENAI_API_KEY')
+api_key = os.getenv('OPENAI_API_KEY')
 
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
+@app.route("/generate_course", methods=['POST'])   
+async def generate_course():
+    """
+    Generates a course based on the provided parameters.
+    Expects:
+        - student_status: str
+        - course: str
+        - platforms: list of str
+    Returns:
+        - JSON response with the generated course details.
+    """
+    data = request.get_json()
+    student_status = data.get('student_status')
+    course = data.get('course')
+    platforms = data.get('platforms')
+
+    if not student_status or not course or not platforms:
+        return jsonify({"error": "Missing required parameters"}), 400
+    urls = get_urls(api_key, student_status, course, platforms)
+    
+    tasks = [async_get_modules(api_key, url) for url in urls]
+    for future in asyncio.as_completed(tasks):
+        result = await future
+        yield result  # you can stream this to frontend
 
 
 @app.route("/metrics")
