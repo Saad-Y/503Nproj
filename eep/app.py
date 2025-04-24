@@ -4,6 +4,7 @@ import openai
 from routes.document_upload import document_upload_route
 from routes.auth_routes import auth_routes
 from routes.quiz_generation import quiz_routes
+from routes.course_creator import iep_course_creator_routes
 from database.database import db
 import os
 from secrets import OPENAI_API_KEY, mysql_password, ssl_cert
@@ -25,6 +26,7 @@ app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
 app.register_blueprint(quiz_routes)
 
+app.register_blueprint(iep_course_creator_routes)
 
 @app.route('/', methods=['GET'])
 def healthcheck():
