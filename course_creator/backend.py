@@ -1,4 +1,5 @@
 import json
+from openai import OpenAI
 def extract_text_from_response(response):
     """
     Extracts the text from the OpenAI RESPONSE API response.
@@ -30,13 +31,13 @@ def extract_text_from_response(response):
         raise ValueError(f"Invalid response format: {e}")   
 
 
-def get_urls(response_parsed):
+def parse_urls(response_parsed):
   urls = []
   for r in response_parsed:
       urls.append(response_parsed[r]['url'])
   return urls
 
-from openai import OpenAI
+
 def send_to_api(prompt , api_key):
     
     client = OpenAI(api_key=api_key)
@@ -56,22 +57,20 @@ def send_to_api(prompt , api_key):
 def get_modules(api_key, url):
 
     prompt = (
-            str(f"""   what are the modules for this course {url} ? please state for each module what are the covered topics and what will the student understand from these topics.
-            Please double check of the url returned, you are returning broken ones
-            Don't guess the URLs, actually fetch the page and extract them directly from the HTML or navigation list
-            please return them in this format in json: [
-            {
-                "unit_name": 
-                "unit_url": ,
-                "unit_summary": 
-                "learning_objectives": [
-                "Understand vector representation and operations",
-                "Apply dot and cross products",
-                "Visualize vectors in 2D and 3D space"
-                ]
-            },
-            ...
-            ] """))
+        f"what are the modules for this course {url} ? please state for each module what are the covered topics and what will the student understand from these topics."
+        "Please double check of the url returned, you are returning broken ones"
+        "Don't guess the URLs, actually fetch the page and extract them directly from the HTML or navigation list"
+        "please return them in this format in json: ["
+        "{"
+                "unit_name : " 
+                "unit_url :"
+                "unit_summary : "
+                "learning_objectives : ["
+                "Understand vector representation and operations ,"
+                "Apply dot and cross products, "
+                "Visualize vectors in 2D and 3D space ]"
+        "}"
+            )
     response = send_to_api(prompt, api_key)
     return response
 
@@ -97,8 +96,19 @@ def get_urls(api_key , student_status , course , platforms):
     """
     )
     response = send_to_api(prompt, api_key)
-    urls = get_urls(response)
+    urls = parse_urls(response)
     return urls
 
 
+def generate_course(api_key, student_status , course , platforms):
+    """
+    student_status: a string that describes the student status, like computer science student
+    course : common name for course example calculus 3
+    platforms : a list of platforms to search in, like udemy, coursera, edx
+    """
+    urls = get_urls(api_key , student_status , course , platforms)
+    modules = []
+    for url in urls:
+        modules.append(get_modules(api_key, url))
+    return modules
 
