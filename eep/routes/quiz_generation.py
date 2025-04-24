@@ -160,12 +160,23 @@ def generate_insights():
     insights = []
     for answer in wrong_answers:
         try:
+            prompt = (
+            f"Question: {answer['question']}\n"
+            f"Correct Answer: {answer['correct_answer']}"
+              )
             response = requests.post(
-                f"{GPT_IEP}/get_response",
-                json={
-                    "system_message": "You are an expert teacher. Provide a very brief explanation for the following correct answer:",
-                    "context": answer["correct_answer"]
-                }
+            f"{GPT_IEP}/get_response",
+            json={
+                "system_message": (
+                    "You are an expert teacher. "
+                    "You will be receiving inputs in the following format:"
+                    "Question:"
+                    "Correct Answer:"
+                    "Assume the 'correct answer' that you are given is the correct answer for the question "
+                   "Explain *why* the answer is correct very briefly in a couple sentences max, referencing the question."
+                ),
+                "context": prompt
+            }
             )
             response.raise_for_status()
             insight = response.json().get('response', '')
