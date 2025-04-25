@@ -109,6 +109,7 @@ jobs:
         kubectl apply -f k8s/prometheus-deployment.yaml
         kubectl apply -f k8s/prometheus-service.yaml
         kubectl apply -f k8s/prometheus-rbac.yaml
+        kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
         kubectl apply -f k8s/hpa.yaml
 
         
