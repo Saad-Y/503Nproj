@@ -109,15 +109,6 @@ jobs:
         kubectl apply -f k8s/prometheus-deployment.yaml
         kubectl apply -f k8s/prometheus-service.yaml
         kubectl apply -f k8s/prometheus-rbac.yaml
-    - name: Download and fix metrics-server manifest
-      run: |
-        curl -LO https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-        sed -i 's/memory: 200Mi/memory: 100Mi/' components.yaml
 
-    - name: Apply metrics-server with fixed memory request
-      run: |
-        kubectl apply -f components.yaml
-
-        kubectl apply -f k8s/hpa.yaml
 
         
