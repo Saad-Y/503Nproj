@@ -50,7 +50,7 @@ async def generate_course():
     platforms = data.get('platforms')
 
     if not student_status or not course or not platforms:
-        return jsonify({"error": "Missing required parameters"}), 400
+        yield jsonify({"error": "Missing required parameters"}), 400
     urls = get_urls(api_key, student_status, course, platforms)
     
     tasks = [async_get_modules(api_key, url) for url in urls]

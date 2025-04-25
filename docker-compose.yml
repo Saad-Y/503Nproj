@@ -39,6 +39,18 @@ services:
     environment:
       - OPENAI_API_KEY
 
+  course_creator:
+    build:
+      context: ./course_creator
+
+    container_name: course_creator
+    networks:
+      - my_network
+    ports:
+      - "5004:5004"
+    environment:
+      - OPENAI_API_KEY
+
   eep:
     env_file:
       - ./.env
@@ -58,20 +70,20 @@ services:
       retries: 20
       start_period: 10s
 
-  frontend:
-    env_file:
-      - ./.env
-    build:
-      context: ./learning-platform
+  # frontend:
+  #   env_file:
+  #     - ./.env
+  #   build:
+  #     context: ./frontend
 
-    ports:
-      - "3000:3000"
-    networks:
-      - my_network
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - my_network
 
-    depends_on:
-      eep:
-        condition: service_healthy
+  #   depends_on:
+  #     eep:
+  #       condition: service_healthy
 
   prometheus:
     image: prom/prometheus
