@@ -7,7 +7,7 @@ import threading
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-from .backend import get_urls, async_get_modules
+from backend import get_urls, async_get_modules
 import asyncio
 load_dotenv()
 
