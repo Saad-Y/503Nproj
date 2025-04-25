@@ -48,7 +48,7 @@ jobs:
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/course-creator:latest
 
         docker build --no-cache \
-          --build-arg REACT_APP_API_URL=https://20.233.221.128/api/eep \
+          --build-arg REACT_APP_API_URL=https://learnify503n.space/api/eep \
           -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest \
           ./frontend
 
