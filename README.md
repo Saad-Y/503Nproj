@@ -49,3 +49,7 @@ pytest -q gpt_iep/tests/test_app.py
 ```
 pytest -q audio_gen_iep/tests/test_app.py
 ```
+4. Test the course_creator  
+```
+pytest -q course_creator/tests/test_app.py
+```
