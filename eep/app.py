@@ -32,16 +32,21 @@ def healthcheck():
     return jsonify({"status": "ok"}), 200
 
 
+LOCAL = os.getenv("LOCAL", "false")
+
 # Connect to db
-cert = "-----BEGIN CERTIFICATE-----\n" + '\n'.join([ssl_cert[i:i+64] for i in range(0, len(ssl_cert), 64)]) + "\n-----END CERTIFICATE-----"
-os.makedirs('tmp', exist_ok=True)
-cert_path = "./tmp/DigiCertGlobalRootCA.crt.pem"
-with open(cert_path, "w") as f:
-    f.write(cert)
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f'mysql+pymysql://learnify:{mysql_password}@learnifysqldb.mysql.database.azure.com:3306/learnifydb?'
-    f'ssl_ca={cert_path}'
-)
+if LOCAL == "false":
+    cert = "-----BEGIN CERTIFICATE-----\n" + '\n'.join([ssl_cert[i:i+64] for i in range(0, len(ssl_cert), 64)]) + "\n-----END CERTIFICATE-----"
+    os.makedirs('tmp', exist_ok=True)
+    cert_path = "./tmp/DigiCertGlobalRootCA.crt.pem"
+    with open(cert_path, "w") as f:
+        f.write(cert)
+    app.config['SQLALCHEMY_DATABASE_URI'] = (
+        f'mysql+pymysql://learnify:{mysql_password}@learnifysqldb.mysql.database.azure.com:3306/learnifydb?'
+        f'ssl_ca={cert_path}'
+    )
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///learnifydb.db'
 db.init_app(app)
 
 with app.app_context():
