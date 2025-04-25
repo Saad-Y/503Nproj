@@ -110,6 +110,13 @@ jobs:
         kubectl apply -f k8s/prometheus-service.yaml
         kubectl apply -f k8s/prometheus-rbac.yaml
         kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+        kubectl -n kube-system patch deployment metrics-server \
+          --type='json' \
+          -p='[{
+            "op": "replace",
+            "path": "/spec/template/spec/containers/0/resources/requests/memory",
+            "value": "100Mi"
+          }]'
         kubectl apply -f k8s/hpa.yaml
 
         
