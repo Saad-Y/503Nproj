@@ -7,8 +7,8 @@ import threading
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-from backend import get_urls, async_get_modules
-import asyncio
+from backend import  generate_course
+
 load_dotenv()
 
 # -------------------- Prometheus Metrics --------------------
@@ -34,7 +34,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 @app.route("/generate_course", methods=['POST'])   
-async def generate_course():
+def generate_course_api():
     """
     Generates a course based on the provided parameters.
     Expects:
@@ -44,21 +44,27 @@ async def generate_course():
     Returns:
         - JSON response with the generated course details.
     """
-    data = request.get_json()
-    student_status = data.get('student_status')
-    course = data.get('course')
-    platforms = data.get('platforms')
+    with COURSE_LATENCY.time():
+        COURSE_CALLS.inc()
+        data = request.get_json()
+        student_status = data.get('student_status')
+        course = data.get('course')
+        platforms = data.get('platforms')
 
-    if not student_status or not course or not platforms:
-        return jsonify({"error": "Missing required parameters"}), 400
-    urls = get_urls(api_key, student_status, course, platforms)
-    
-    tasks = [async_get_modules(api_key, url) for url in urls]
-    for future in asyncio.as_completed(tasks):
-        result = await future
-        return result  # you can stream this to frontend
+        if not student_status or not course or not platforms:
+            COURSE_ERRORS.labels(error_type="bad_request").inc()
+            return jsonify({"error": "Missing required parameters"}), 400
+        try:
+            course_content = generate_course(api_key, student_status, course, platforms)
+            return jsonify({
+                "course": course,
+                "modules": course_content,  
+            }), 200
+        except Exception as e:
+            COURSE_ERRORS.labels(error_type=type(e).__name__).inc()
+            return jsonify({"error": str(e)}), 500
 
-
+ 
 @app.route("/metrics")
 def metrics():
     return generate_latest(), 200, {'Content-Type': 'text/plain; version=0.0.4'}

@@ -35,7 +35,7 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-@app.route('/synthesize', methods=['GET'])
+@app.route('/synthesize', methods=['POST'])
 def synthesize():
     SYNTH_CALLS.inc()
     with SYNTH_LATENCY.time():
@@ -88,4 +88,4 @@ def start_servers():
 
 if __name__ == '__main__':
     server_thread = threading.Thread(target=start_servers).start()
-    app.run(host="0.0.0.0", port=5003,debug=True)
+    app.run(host="0.0.0.0", port=5003) 

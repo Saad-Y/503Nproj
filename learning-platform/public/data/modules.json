@@ -1,0 +1,146 @@
+[
+  {
+    "id": "mod-1",
+    "unit_name": "Introduction to Web Development",
+    "unit_url": "/modules/intro-web-dev",
+    "unit_summary": "This module provides a comprehensive introduction to web development, covering the fundamental concepts of HTML, CSS, and JavaScript.",
+    "learning_objectives": [
+      "Understand the basic structure of the web",
+      "Learn the fundamentals of HTML markup",
+      "Grasp the basics of CSS styling",
+      "Get introduced to JavaScript programming"
+    ],
+    "learning_outcomes": [
+      "Create a simple web page using HTML",
+      "Style web content using CSS",
+      "Add basic interactivity with JavaScript",
+      "Understand how the web works"
+    ]
+  },
+  {
+    "id": "mod-2",
+    "unit_name": "Responsive Design Principles",
+    "unit_url": "/modules/responsive-design",
+    "unit_summary": "Learn how to create websites that work well on all devices, from desktop computers to mobile phones, using responsive design techniques.",
+    "learning_objectives": [
+      "Understand the concept of responsive design",
+      "Learn about media queries in CSS",
+      "Explore flexible grid layouts",
+      "Understand mobile-first design approach"
+    ],
+    "learning_outcomes": [
+      "Create responsive layouts that adapt to different screen sizes",
+      "Implement media queries for device-specific styling",
+      "Build flexible grid systems",
+      "Design websites with mobile users in mind"
+    ]
+  },
+  {
+    "id": "mod-3",
+    "unit_name": "JavaScript Fundamentals",
+    "unit_url": "/modules/js-fundamentals",
+    "unit_summary": "A deep dive into JavaScript programming, covering variables, functions, objects, arrays, and control structures.",
+    "learning_objectives": [
+      "Understand JavaScript syntax and data types",
+      "Learn about functions and scope",
+      "Explore objects and arrays",
+      "Master control flow and loops"
+    ],
+    "learning_outcomes": [
+      "Write clean, efficient JavaScript code",
+      "Create and use functions effectively",
+      "Work with complex data structures",
+      "Implement logical program flow"
+    ]
+  },
+  {
+    "id": "mod-4",
+    "unit_name": "React Basics",
+    "unit_url": "/modules/react-basics",
+    "unit_summary": "Introduction to React, a popular JavaScript library for building user interfaces, focusing on components, props, and state.",
+    "learning_objectives": [
+      "Understand the React component model",
+      "Learn about JSX syntax",
+      "Explore props and state",
+      "Understand the React rendering lifecycle"
+    ],
+    "learning_outcomes": [
+      "Create functional and class components",
+      "Pass data between components using props",
+      "Manage component state effectively",
+      "Build interactive UIs with React"
+    ]
+  },
+  {
+    "id": "mod-5",
+    "unit_name": "Next.js Fundamentals",
+    "unit_url": "/modules/nextjs-fundamentals",
+    "unit_summary": "Learn the basics of Next.js, a React framework that enables server-side rendering and static site generation for React applications.",
+    "learning_objectives": [
+      "Understand the benefits of Next.js",
+      "Learn about pages and routing",
+      "Explore data fetching methods",
+      "Understand server-side rendering and static generation"
+    ],
+    "learning_outcomes": [
+      "Create a Next.js application from scratch",
+      "Implement dynamic routing",
+      "Fetch data using getStaticProps and getServerSideProps",
+      "Deploy a Next.js application"
+    ]
+  },
+  {
+    "id": "mod-6",
+    "unit_name": "API Integration",
+    "unit_url": "/modules/api-integration",
+    "unit_summary": "Learn how to integrate external APIs into your web applications, handling authentication, data fetching, and error handling.",
+    "learning_objectives": [
+      "Understand RESTful API concepts",
+      "Learn about HTTP methods and status codes",
+      "Explore authentication methods",
+      "Master error handling techniques"
+    ],
+    "learning_outcomes": [
+      "Fetch data from external APIs",
+      "Implement authentication for API requests",
+      "Handle API errors gracefully",
+      "Create a web application that uses third-party data"
+    ]
+  },
+  {
+    "id": "mod-7",
+    "unit_name": "Database Design",
+    "unit_url": "/modules/database-design",
+    "unit_summary": "Introduction to database design principles, focusing on relational databases, normalization, and SQL queries.",
+    "learning_objectives": [
+      "Understand database design principles",
+      "Learn about normalization",
+      "Explore SQL query language",
+      "Understand database relationships"
+    ],
+    "learning_outcomes": [
+      "Design efficient database schemas",
+      "Write complex SQL queries",
+      "Implement database relationships",
+      "Optimize database performance"
+    ]
+  },
+  {
+    "id": "mod-8",
+    "unit_name": "User Experience Design",
+    "unit_url": "/modules/ux-design",
+    "unit_summary": "Learn the principles of user experience design, focusing on usability, accessibility, and user-centered design methodologies.",
+    "learning_objectives": [
+      "Understand user-centered design principles",
+      "Learn about usability testing",
+      "Explore accessibility guidelines",
+      "Master information architecture"
+    ],
+    "learning_outcomes": [
+      "Create user-friendly interfaces",
+      "Conduct effective usability tests",
+      "Build accessible web applications",
+      "Design intuitive information hierarchies"
+    ]
+  }
+]

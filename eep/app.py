@@ -1,13 +1,14 @@
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort ,Response
 from flask_cors import CORS
 import openai
 from routes.document_upload import document_upload_route
 from routes.auth_routes import auth_routes
 from routes.quiz_generation import quiz_routes
+from routes.course_creator import iep_course_creator_routes
 from database.database import db
 import os
 from secrets import OPENAI_API_KEY, mysql_password, ssl_cert
-
+import requests
 openai.api_key = OPENAI_API_KEY
 
 app = Flask(__name__)
@@ -25,7 +26,7 @@ CORS(app, resources={r"/*": {"origins": [
 app.register_blueprint(document_upload_route)
 app.register_blueprint(auth_routes)
 app.register_blueprint(quiz_routes)
-
+app.register_blueprint(iep_course_creator_routes)
 
 @app.route('/', methods=['GET'])
 def healthcheck():
@@ -34,6 +35,37 @@ def healthcheck():
 
 LOCAL = os.getenv("LOCAL", "false")
 
+
+from flask import Response  # Add this import
+SYNTHIZE_API = "audio_gen_iep:5003"  # Use Docker service name, not localhost
+
+@app.route('/synthesize', methods=['POST'])
+def proxy_synthesize():
+    try:
+        # Forward headers (including cookies)
+        headers = {
+            "Content-Type": "application/json",
+            "Cookie": request.headers.get("Cookie", ""),  # Critical for auth
+        }
+
+        # Forward request to backend
+        resp = requests.post(
+            f"http://{SYNTHIZE_API}/synthesize",
+            json=request.get_json(),
+            headers=headers,
+            stream=True  # Stream binary response
+        )
+
+        # Return backend's response directly
+        return Response(
+            resp.iter_content(chunk_size=8192),  # Stream audio bytes
+            status=resp.status_code,
+            content_type=resp.headers.get("Content-Type", "audio/mpeg"),
+        )
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": str(e)}), 500
+    
 # Connect to db
 if LOCAL == "false":
     cert = "-----BEGIN CERTIFICATE-----\n" + '\n'.join([ssl_cert[i:i+64] for i in range(0, len(ssl_cert), 64)]) + "\n-----END CERTIFICATE-----"
@@ -52,8 +84,10 @@ db.init_app(app)
 with app.app_context():
     from model.user import User
     from model.doc import Doc
+    from model.course import Course
 
     if app.config["SQLALCHEMY_DATABASE_URI"]:
+        
         db.create_all()
 
 

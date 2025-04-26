@@ -39,6 +39,8 @@ def allowed_file_type(file_path):
     mime = magic.Magic(mime=True)
     file_mime_type = mime.from_file(file_path)
     logging.info(f"Detected MIME type: {file_mime_type}")
+
+   
     return file_mime_type in ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
 
 def allowed_file(filename):

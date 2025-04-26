@@ -82,6 +82,7 @@ class FileProcessorService:
             ValueError: If extraction fails or contains no text.
         """
         try:
+            
             document = Document(file.stream)
             text = "\n".join([para.text for para in document.paragraphs])
             extracted_text = text.strip()

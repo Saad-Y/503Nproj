@@ -65,8 +65,10 @@ def auth_check(username):
     return jsonify({"message": "Token valid", "user": username}), 200
 
 
-@auth_routes.route('/login', methods=['POST'])
+@auth_routes.route('/login', methods=['POST' , 'OPTIONS'])
 def authenticate():
+    if request.method == 'OPTIONS':
+        return '', 204
     username = request.json['username']
     password = request.json['password']
     if username=="" or password=="" or type(username)!=str or type(password)!=str:
@@ -92,8 +94,11 @@ def logout():
     response.set_cookie('learnify-token', '', expires=0, httponly=True, samesite='None')
     return response
 
-@auth_routes.route('/signup', methods=['POST'])
+@auth_routes.route('/signup', methods=['POST', 'OPTIONS'])
 def signup():
+    if request.method == 'OPTIONS':
+        # Respond to CORS preflight
+        return '', 204
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
