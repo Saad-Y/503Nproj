@@ -37,7 +37,11 @@ LOCAL = os.getenv("LOCAL", "false")
 
 
 from flask import Response  # Add this import
-SYNTHIZE_API = "audio_gen_iep:5003"  # Use Docker service name, not localhost
+
+if LOCAL == "false":
+    SYNTHIZE_API = "audio-gen:5003"
+else:
+    SYNTHIZE_API = "audio_gen_iep:5003"  # Use Docker service name, not localhost
 
 @app.route('/synthesize', methods=['POST'])
 def proxy_synthesize():

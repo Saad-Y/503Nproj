@@ -34,6 +34,8 @@ spec:
                   key: ca-cert
             - name: EMBEDDINGS_IEP
               value: 'http://embeddings:5001'
+            - name: IEP_COURSE_CREATOR_URL
+              value: 'http://course-creator:5004'
             - name: GPT_IEP
               value: 'http://gpt:5002'
             - name: AUDIO_GEN_IEP

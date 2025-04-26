@@ -31,7 +31,7 @@ print(EMBEDDINGS_IEP)
 
 document_upload_route = Blueprint('document_upload_routes', __name__)
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf' , 'docx', 'txt'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 UPLOAD_FOLDER = ''
 
 def allowed_file_type(file_path):
