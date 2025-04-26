@@ -64,7 +64,7 @@ export default function DashboardPage() {
   const fetchEnrolledCourses = async () => {
     try {
       setIsLoadingCourses(true)
-      const response = await fetch("/api/enrolled-courses", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/enrolled-courses`, {
         credentials: "include",
       })
 

@@ -76,7 +76,7 @@ export function NotesPage() {
   const fetchNotes = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/documents", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/documents`, {
         credentials: "include",
       })
 
@@ -119,7 +119,7 @@ export function NotesPage() {
       const formData = new FormData()
       formData.append("file", file)
 
-      const endpoint = isNonParsable ? "/api/upload_document_non_parsable" : "/api/upload_document_parsable"
+      const endpoint = isNonParsable ? `${process.env.NEXT_PUBLIC_AUTH_API_URL}/upload_document_non_parsable` : `${process.env.NEXT_PUBLIC_AUTH_API_URL}/upload_document_parsable`
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -159,7 +159,7 @@ export function NotesPage() {
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      const response = await fetch(`/api/delete_document/${noteId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/delete_document/${noteId}`, {
         method: "DELETE",
         credentials: "include",
       })
@@ -190,7 +190,7 @@ export function NotesPage() {
       setSelectedNote(note)
       setIsNoteOpen(true)
 
-      const response = await fetch(`/api/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
         credentials: "include",
       })
 
@@ -217,7 +217,7 @@ export function NotesPage() {
 
       // First, fetch the note content if not already loaded
       if (!noteContent) {
-        const response = await fetch(`/api/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
           credentials: "include",
         })
 
@@ -230,7 +230,7 @@ export function NotesPage() {
       }
 
       // Then generate audio from the content
-      const audioResponse = await fetch("/api/synthesize", {
+      const audioResponse = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/synthesize`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -282,7 +282,7 @@ export function NotesPage() {
       setQuizSubmitted(false)
       setQuizScore({ correct: 0, total: 0 })
 
-      const response = await fetch("/api/generate_quiz", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/generate_quiz`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -75,7 +75,7 @@ export function NotesDirectory() {
   const fetchNotes = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/documents", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/documents`, {
         credentials: "include",
       })
       if (!response.ok) throw new Error("Failed to fetch notes")
@@ -116,7 +116,7 @@ export function NotesDirectory() {
       }, 200)
 
       // Determine if file is parsable based on extension
-      const endpoint = isNonParsable ? "/api/upload_document_non_parsable" : "/api/upload_document_parsable"
+      const endpoint = isNonParsable ? `${process.env.NEXT_PUBLIC_AUTH_API_URL}/upload_document_non_parsable` : `${process.env.NEXT_PUBLIC_AUTH_API_URL}/upload_document_parsable`
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -154,7 +154,7 @@ export function NotesDirectory() {
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      const response = await fetch(`/api/delete_document/${noteId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/delete_document/${noteId}`, {
         method: "DELETE",
         credentials: "include",
       })
@@ -183,7 +183,7 @@ export function NotesDirectory() {
       setSelectedNote(note)
       setIsNoteOpen(true)
 
-      const response = await fetch(`/api/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/fetch_notes?doc_name=${encodeURIComponent(note.title)}`, {
         credentials: "include",
       })
       if (!response.ok) throw new Error("Failed to fetch note content")
@@ -206,7 +206,7 @@ export function NotesDirectory() {
     try {
       setIsGeneratingAudio(true)
 
-      const response = await fetch("/api/synthesize", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/synthesize`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -250,7 +250,7 @@ export function NotesDirectory() {
       setQuizSubmitted(false)
       setQuizScore({ correct: 0, total: 0 })
 
-      const response = await fetch("/api/generate_quiz", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/generate_quiz`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
