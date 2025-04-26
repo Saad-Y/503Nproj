@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, Github, Loader2, BookOpen } from "lucide-react"
+import { Eye, EyeOff, Loader2, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -120,13 +120,13 @@ export default function AuthPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4">
       <div className="absolute top-8 left-8 text-xl font-bold flex items-center gap-2 hover:opacity-80 transition-opacity">
         <BookOpen className="h-6 w-6" />
-        <span>LearnHub</span>
+        <span>Learnify</span>
       </div>
 
       <div className="w-full max-w-md">
         <Card className="w-full">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Welcome to LearnHub</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Welcome to Learnify</CardTitle>
             <CardDescription className="text-center">Your journey to knowledge starts here</CardDescription>
           </CardHeader>
           <CardContent>
@@ -270,22 +270,6 @@ export default function AuthPage() {
                 </form>
               </TabsContent>
             </Tabs>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" className="w-full">
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
-            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-center text-sm text-muted-foreground">

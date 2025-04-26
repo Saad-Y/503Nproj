@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { FileText, Upload, Trash2, Play, BookOpen, Loader2, FileUp, X } from "lucide-react"
+import { FileText, Upload, Trash2, Play, BookOpen, Loader2, FileUp, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface Note {
   id: string
@@ -41,6 +42,11 @@ export function NotesPage() {
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const [isNonParsable, setIsNonParsable] = useState(false)
+  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({})
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const [quizScore, setQuizScore] = useState<{ correct: number; total: number }>({ correct: 0, total: 0 })
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
 
   useEffect(() => {
     fetchNotes()
@@ -93,8 +99,8 @@ export function NotesPage() {
       formData.append("file", file)
 
       // Determine if file is parsable based on extension
-      const isParsable = /\.(txt|pdf|docx)$/i.test(file.name)
-      const endpoint = isParsable ? "/api/upload_document_parsable" : "/api/upload_document_non_parsable"
+      // const isParsable = /\.(txt|pdf|docx)$/i.test(file.name)
+      const endpoint = isNonParsable ? "/api/upload_document_non_parsable" : "/api/upload_document_parsable"
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -250,6 +256,9 @@ export function NotesPage() {
     try {
       setSelectedNote(note)
       setIsGeneratingQuiz(true)
+      setCurrentQuestionIndex(0)
+      setUserAnswers({})
+      setQuizSubmitted(false)
 
       const response = await fetch("/api/generate_quiz", {
         method: "POST",
@@ -303,6 +312,51 @@ export function NotesPage() {
     }
   }
 
+  const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
+    if (quizSubmitted) return
+    setUserAnswers((prev) => ({
+      ...prev,
+      [questionIndex]: answerIndex,
+    }))
+  }
+
+  const handleQuizSubmit = () => {
+    if (!quiz) return
+
+    let correctCount = 0
+    quiz.forEach((question: any, index: number) => {
+      if (userAnswers[index] === question.answer) {
+        correctCount++
+      }
+    })
+
+    setQuizScore({
+      correct: correctCount,
+      total: quiz.length,
+    })
+
+    setQuizSubmitted(true)
+  }
+
+  const handleQuizReset = () => {
+    setUserAnswers({})
+    setQuizSubmitted(false)
+    setQuizScore({ correct: 0, total: 0 })
+    setCurrentQuestionIndex(0)
+  }
+
+  const goToNextQuestion = () => {
+    if (quiz && currentQuestionIndex < quiz.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1)
+    }
+  }
+
+  const goToPreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1)
+    }
+  }
+
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div>
@@ -333,6 +387,19 @@ export function NotesPage() {
                     <p className="font-medium mb-1">Drop your own notes here</p>
                     <p className="text-sm text-muted-foreground">Supports PDF, DOCX, TXT, and image files</p>
                   </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Checkbox
+                      id="non-parsable"
+                      checked={isNonParsable}
+                      onCheckedChange={() => setIsNonParsable(!isNonParsable)}
+                    />
+                    <label
+                      htmlFor="non-parsable"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Document contains images of text (non-parsable)
+                    </label>
+                  </div>
                   <Button onClick={() => fileInputRef.current?.click()} variant="outline" disabled={uploading}>
                     {uploading ? (
                       <>
@@ -351,7 +418,7 @@ export function NotesPage() {
                     ref={fileInputRef}
                     onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                     className="hidden"
-                    accept=".pdf,.txt,.docx,.png,.jpg,.jpeg"
+                    accept=".pdf,.txt,.png,.jpg,.jpeg"
                   />
                 </div>
               </div>
@@ -534,43 +601,142 @@ export function NotesPage() {
 
       {/* Quiz Dialog */}
       {quiz && (
-        <Dialog open={isQuizOpen} onOpenChange={setIsQuizOpen}>
+        <Dialog
+          open={isQuizOpen}
+          onOpenChange={(open) => {
+            setIsQuizOpen(open)
+            if (!open) {
+              handleQuizReset()
+            }
+          }}
+        >
           <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Quiz on {selectedNote?.title}</DialogTitle>
-              <DialogDescription>Test your knowledge with these questions</DialogDescription>
+              <DialogDescription>
+                {quizSubmitted
+                  ? `You scored ${quizScore.correct} out of ${quizScore.total}`
+                  : "Select the best answer for each question"}
+              </DialogDescription>
             </DialogHeader>
 
-            <ScrollArea className="flex-1 mt-4 mb-6">
-              <div className="space-y-6">
-                {quiz.map((question: any, index: number) => (
-                  <div key={index} className="border rounded-md p-4">
-                    <h3 className="font-medium mb-3">
-                      {index + 1}. {question.question}
-                    </h3>
-                    <div className="space-y-2 ml-4">
-                      {question.options.map((option: string, optIndex: number) => (
-                        <div key={optIndex} className="flex items-center gap-2">
-                          <div
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                              optIndex === question.answer
-                                ? "bg-green-100 text-green-800 border border-green-300"
-                                : "bg-gray-100 text-gray-800 border border-gray-300"
-                            }`}
-                          >
-                            {String.fromCharCode(65 + optIndex)}
-                          </div>
-                          <span className={optIndex === question.answer ? "font-medium" : ""}>{option}</span>
-                        </div>
-                      ))}
+            <div className="flex-1 mt-4 mb-6 border rounded-md p-6">
+              {quiz.length > 0 && (
+                <div>
+                  <div className="mb-4 flex justify-between items-center">
+                    <div className="text-sm font-medium">
+                      Question {currentQuestionIndex + 1} of {quiz.length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {Object.keys(userAnswers).length} of {quiz.length} answered
                     </div>
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
+
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium mb-4">{quiz[currentQuestionIndex].question}</h3>
+                    <div className="space-y-3">
+                      {quiz[currentQuestionIndex].options.map((option: string, optionIndex: number) => {
+                        const isSelected = userAnswers[currentQuestionIndex] === optionIndex
+                        const isCorrect = quiz[currentQuestionIndex].answer === optionIndex
+                        const showCorrect = quizSubmitted && isCorrect
+                        const showIncorrect = quizSubmitted && isSelected && !isCorrect
+
+                        return (
+                          <div
+                            key={optionIndex}
+                            className={`flex items-center gap-2 p-3 rounded-md cursor-pointer border ${
+                              isSelected ? "border-primary bg-primary/5" : "border-muted"
+                            } ${showCorrect ? "border-green-500 bg-green-50" : ""} ${
+                              showIncorrect ? "border-red-500 bg-red-50" : ""
+                            }`}
+                            onClick={() => handleAnswerSelect(currentQuestionIndex, optionIndex)}
+                          >
+                            <div
+                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                                isSelected
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-gray-100 text-gray-800 border border-gray-300"
+                              } ${showCorrect ? "bg-green-500 text-white" : ""} ${
+                                showIncorrect ? "bg-red-500 text-white" : ""
+                              }`}
+                            >
+                              {String.fromCharCode(65 + optionIndex)}
+                            </div>
+                            <span className={`${isSelected ? "font-medium" : ""} ${showCorrect ? "font-medium" : ""}`}>
+                              {option}
+                            </span>
+                            {quizSubmitted && isCorrect && (
+                              <span className="ml-auto text-green-600 text-sm font-medium">Correct</span>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      onClick={goToPreviousQuestion}
+                      disabled={currentQuestionIndex === 0}
+                      className="flex items-center gap-1"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Previous
+                    </Button>
+                    {currentQuestionIndex < quiz.length - 1 ? (
+                      <Button
+                        onClick={goToNextQuestion}
+                        className="flex items-center gap-1"
+                        disabled={!userAnswers.hasOwnProperty(currentQuestionIndex)}
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleQuizSubmit}
+                        disabled={quizSubmitted || Object.keys(userAnswers).length < quiz.length}
+                      >
+                        Submit Quiz
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <DialogFooter>
-              <Button onClick={() => setIsQuizOpen(false)}>Close</Button>
+              {quizSubmitted ? (
+                <div className="flex w-full justify-between items-center">
+                  <div className="text-sm">
+                    <span className="font-medium">Score: </span>
+                    <span
+                      className={`${
+                        quizScore.correct === quizScore.total
+                          ? "text-green-600"
+                          : quizScore.correct > quizScore.total / 2
+                            ? "text-amber-600"
+                            : "text-red-600"
+                      }`}
+                    >
+                      {quizScore.correct}/{quizScore.total} ({Math.round((quizScore.correct / quizScore.total) * 100)}%)
+                    </span>
+                  </div>
+                  <div className="space-x-2">
+                    <Button variant="outline" onClick={handleQuizReset}>
+                      Try Again
+                    </Button>
+                    <Button onClick={() => setIsQuizOpen(false)}>Close</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-end">
+                  <Button variant="outline" onClick={() => setIsQuizOpen(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

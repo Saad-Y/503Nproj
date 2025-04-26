@@ -9,7 +9,7 @@ def extract_text_from_response(response):
         r = json.dumps(response.output, default=lambda o: o.__dict__ , indent=2)
         # Parse the JSON string back into a Python dictionary
         json_data = json.loads(r)
-        print ('data recieved = ' , json_data)
+        
         for item in json_data:
             if 'content' in item:
                 for content_item in item['content']:
@@ -38,7 +38,7 @@ def extract_text_from_response(response):
 
 def parse_urls(response_parsed):
   urls = []
-  print('urls recieved = ',response_parsed)
+  
   for r in response_parsed:
       urls.append(response_parsed[r]['url'])
   return urls
@@ -122,14 +122,4 @@ def generate_course(api_key, student_status , course , platforms):
     return modules
 
 
-async def async_get_modules(api_key, url):
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, get_modules, api_key, url)
 
-async def generate_course_async(api_key, student_status, course, platforms):
-    urls = get_urls(api_key, student_status, course, platforms)
-    
-    tasks = [async_get_modules(api_key, url) for url in urls]
-    for future in asyncio.as_completed(tasks):
-        result = await future
-        yield result  # you can stream this to frontend

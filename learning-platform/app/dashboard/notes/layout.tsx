@@ -3,7 +3,7 @@
 import type React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { BookOpen, LayoutDashboard, FileText, MessageSquare, GraduationCap, LogOut, Loader2 } from "lucide-react"
+import { BookOpen, LayoutDashboard, FileText, LogOut, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { toast } from "@/components/ui/use-toast"
@@ -71,7 +71,7 @@ export default function NotesLayout({
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
           <BookOpen className="h-6 w-6" />
-          <span>LearnHub</span>
+          <span>Learnify</span>
         </Link>
         <nav className="hidden flex-1 md:flex">
           <Link href="/dashboard" className="flex h-full items-center px-4 text-sm font-medium">
@@ -106,17 +106,6 @@ export default function NotesLayout({
               >
                 <FileText className="h-4 w-4" />
                 My Notes
-              </Link>
-              <Link href="/" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted">
-                <MessageSquare className="h-4 w-4" />
-                AI Assistant
-              </Link>
-              <Link
-                href="/dashboard/achievements"
-                className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted"
-              >
-                <GraduationCap className="h-4 w-4" />
-                Achievements
               </Link>
             </nav>
           </div>
