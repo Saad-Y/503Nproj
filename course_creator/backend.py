@@ -67,6 +67,7 @@ def get_modules(api_key, url):
         "Please double check of the url returned, you are returning broken ones"
         "Don't guess the URLs, actually fetch the page and extract them directly from the HTML or navigation list"
         "Dont tell me to check the link myself or to enter the link to get the information, all the information i am requesting is in the html or navigation list. extract it from there"
+        "dont reformat the urls, just return them as they are in the html or navigation list"
         "please return them in this format in json: ["
         "{"
                 "unit_name : " 
