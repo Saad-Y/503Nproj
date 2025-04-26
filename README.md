@@ -11,14 +11,15 @@ https://drive.google.com/file/d/1E12ZxxRLItucd6IXWoz0I7z5nH-JboqD/view?usp=shari
 https://portal.azure.com/#@mail.aub.edu/resource/subscriptions/7f09d7a4-8b8e-4c9e-91ad-d1820abf1358/resourceGroups/LearnifyAI/overview   
  
 
-**It is fully dockerized. To run it, ensure you have a .env file in the root of the project.** The env variables are available here, shared with your gmail: https://drive.google.com/file/d/1dxXaqdh8gZBsrLWBsfx9BhjFGhhkfjZz/view?usp=sharing  
+**It is fully dockerized. To run it, ensure you have a .env file in the root of the project.** The env variables are available here, shared with your gmail. It will be downloaded as "env" so please rename to ".env": https://drive.google.com/file/d/1dxXaqdh8gZBsrLWBsfx9BhjFGhhkfjZz/view?usp=sharing  
 
 Then run:   
 ```
 docker-compose up --build
 ```
 
-The frontend should be accessible on http://localhost:3000.   
+The frontend should be accessible on http://localhost:3000.  
+   
 **Monitoring** is configured on Azure for the hosted app. We hosted a prometheus instance on AKS and it scrapes the other pods.  
 The file used to configure prometheus is `k8s/prometheus-cm0-configmap.yaml`
 
