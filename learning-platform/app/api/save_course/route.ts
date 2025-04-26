@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const cookieHeader = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ")
 
     // Forward the request to the backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_AUTH_API_URL}/save_course`
+    const backendUrl = `${process.env.NEXT_PUBLIC_AUTH_API_URL}/iep/save_course`
 
     const response = await fetch(backendUrl, {
       method: "POST",

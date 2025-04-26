@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const cookieHeader = cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ")
 
     // Forward the request to the backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_AUTH_API_URL}/enrolled_courses`
+    const backendUrl = `${process.env.NEXT_PUBLIC_AUTH_API_URL}/iep/enrolled_courses`
 
     const response = await fetch(backendUrl, {
       method: "GET",
