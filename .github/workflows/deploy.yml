@@ -48,9 +48,9 @@ jobs:
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/course-creator:latest
 
         docker build --no-cache \
-          --build-arg REACT_APP_API_URL=https://learnify503n.space/api/eep \
+          --build-arg NEXT_PUBLIC_AUTH_API_URL=https://learnify503n.space/api/eep \
           -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest \
-          ./frontend
+          ./learning-platform
 
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
 

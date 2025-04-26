@@ -43,7 +43,7 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: api-key
-            - name: REACT_APP_API_URL
+            - name: NEXT_PUBLIC_AUTH_API_URL
               value: 'https://learnify503n.space/api/eep'
             - name: SECRET_KEY
               valueFrom:
