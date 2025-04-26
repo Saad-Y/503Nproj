@@ -6,7 +6,17 @@ https://portal.azure.com/#@mail.aub.edu/resource/subscriptions/7f09d7a4-8b8e-4c9
 **The Hosted App:**   
 https://learnify503n.space   
 
-**It is fully dockerized. To run it, ensure you have a .env file in the root of the project.** We'll send the env file in the submission email. Please add an OpenAI api key, then run:   
+**It is fully dockerized. To run it, ensure you have a .env file in the root of the project.** The following are the env variables. Please add an OpenAI api key:
+```
+OPENAI_API_KEY = insert api key
+SECRET_KEY = "b'|\xe7\xbfU3`\xc4\xec\xa7\xa9zf:}\xb5\xc7\xb9\x139^3@Dv'"
+GPT_IEP = "http://gpt:5002"
+EMBEDDINGS_IEP = "http://embeddings:5001"
+REACT_APP_API_URL="http://localhost:5000"
+LOCAL = "true"
+NEXT_PUBLIC_AUTH_API_URL=http://localhost:5000
+```
+Then run:   
 ```
 docker-compose up --build
 ```

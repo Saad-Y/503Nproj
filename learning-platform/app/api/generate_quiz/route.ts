@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Either document_id or topic is required" }, { status: 400 })
     }
 
-    const response = await fetch(`${process.env.DOCUMENTS_API_URL}/generate_quiz`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/generate_quiz`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

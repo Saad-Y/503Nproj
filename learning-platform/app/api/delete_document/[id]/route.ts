@@ -4,7 +4,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   try {
     const id = params.id
 
-    const response = await fetch(`${process.env.DOCUMENTS_API_URL}/delete_document/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/delete_document/${id}`, {
       method: "DELETE",
       headers: {
         Cookie: request.headers.get("cookie") || "",

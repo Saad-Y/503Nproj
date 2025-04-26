@@ -4,7 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
 
-    const response = await fetch(`${process.env.DOCUMENTS_API_URL}/upload_document_parsable`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/upload_document_parsable`, {
       method: "POST",
       headers: {
         Cookie: request.headers.get("cookie") || "",

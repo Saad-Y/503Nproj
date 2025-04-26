@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 export async function GET(request: NextRequest) {
   try {
     // Forward the request to the backend with cookies for authentication
-    const response = await fetch(`${process.env.DOCUMENTS_API_URL}/documents`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/documents`, {
       headers: {
         Cookie: request.headers.get("cookie") || "",
       },

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const response = await fetch(`${process.env.COURSE_API_URL}/generate_course`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/generate_course`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     }
 
     const response = await fetch(
-      `${process.env.DOCUMENTS_API_URL}/fetch_notes?doc_name=${encodeURIComponent(docName)}`,
+      `${process.env.NEXT_PUBLIC_AUTH_API_URL}/fetch_notes?doc_name=${encodeURIComponent(docName)}`,
       {
         headers: {
           Cookie: request.headers.get("cookie") || "",
