@@ -8,6 +8,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from backend import  generate_course
+import logging
 
 load_dotenv()
 
@@ -62,6 +63,7 @@ def generate_course_api():
             }), 200
         except Exception as e:
             COURSE_ERRORS.labels(error_type=type(e).__name__).inc()
+            logging.error(e)
             return jsonify({"error": str(e)}), 500
 
  

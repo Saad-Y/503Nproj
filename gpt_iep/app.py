@@ -184,9 +184,11 @@ def get_response():
 
         except requests.exceptions.HTTPError as e:
             RESP_ERRORS.labels(error_type='openai_http_error').inc()
+            logging.info(e)
             return jsonify({"error": str(e)}), 500
         except Exception as e:
             RESP_ERRORS.labels(error_type='internal_error').inc()
+            logging.info(e)
             return jsonify({"error": str(e)}), 500
 
 
