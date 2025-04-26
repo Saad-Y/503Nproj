@@ -35,16 +35,16 @@ jobs:
 
     - name: Build and push app images
       run: |
-        docker build  --no-cache -t ${{ secrets.ACR_NAME }}.azurecr.io/audio-gen:latest ./audio_gen_iep
+        docker build   -t ${{ secrets.ACR_NAME }}.azurecr.io/audio-gen:latest ./audio_gen_iep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/audio-gen:latest
 
-        docker build --no-cache -t ${{ secrets.ACR_NAME }}.azurecr.io/eep:latest ./eep
+        docker build  -t ${{ secrets.ACR_NAME }}.azurecr.io/eep:latest ./eep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/eep:latest
 
-        docker build --no-cache -t ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest ./embeddings_iep
+        docker build  -t ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest ./embeddings_iep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest
 
-        docker build --no-cache -t ${{ secrets.ACR_NAME }}.azurecr.io/course-creator:latest ./course_creator
+        docker build  -t ${{ secrets.ACR_NAME }}.azurecr.io/course-creator:latest ./course_creator
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/course-creator:latest
 
         docker build --no-cache \
@@ -54,7 +54,7 @@ jobs:
 
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
 
-        docker build --no-cache -t ${{ secrets.ACR_NAME }}.azurecr.io/gpt:latest ./gpt_iep
+        docker build  -t ${{ secrets.ACR_NAME }}.azurecr.io/gpt:latest ./gpt_iep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/gpt:latest
 
     - name: Set AKS context manually
