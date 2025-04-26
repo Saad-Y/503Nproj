@@ -74,6 +74,8 @@ services:
       - ./.env
     build:
       context: ./learning-platform
+      args:
+        NEXT_PUBLIC_AUTH_API_URL: ${NEXT_PUBLIC_AUTH_API_URL}
 
     ports:
       - "3000:3000"

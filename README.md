@@ -1,28 +1,25 @@
 # 503Nproj
 
+**This repo is ~80 MB so please be patient while cloning and read me in the meantime**
+
+**In this video, we show you our resource group** (we used AKS):
+
+https://drive.google.com/file/d/1E12ZxxRLItucd6IXWoz0I7z5nH-JboqD/view?usp=sharing  
+
+
 **Our Resource Group on Azure (we gave you reader access on your AUB email):**   
 https://portal.azure.com/#@mail.aub.edu/resource/subscriptions/7f09d7a4-8b8e-4c9e-91ad-d1820abf1358/resourceGroups/LearnifyAI/overview   
+ 
 
-**The Hosted App:**   
-https://learnify503n.space   
+**It is fully dockerized. To run it, ensure you have a .env file in the root of the project.** The env variables are available here, shared with your gmail: https://drive.google.com/file/d/1dxXaqdh8gZBsrLWBsfx9BhjFGhhkfjZz/view?usp=sharing  
 
-**It is fully dockerized. To run it, ensure you have a .env file in the root of the project.** The following are the env variables. Please add an OpenAI api key:
-```
-OPENAI_API_KEY = insert api key
-SECRET_KEY = "b'|\xe7\xbfU3`\xc4\xec\xa7\xa9zf:}\xb5\xc7\xb9\x139^3@Dv'"
-GPT_IEP = "http://gpt:5002"
-EMBEDDINGS_IEP = "http://embeddings:5001"
-REACT_APP_API_URL="http://localhost:5000"
-LOCAL = "true"
-NEXT_PUBLIC_AUTH_API_URL=http://localhost:5000
-```
 Then run:   
 ```
 docker-compose up --build
 ```
 
 The frontend should be accessible on http://localhost:3000.   
-**Monitoring** is configured on Azure for the hosted app. We hosted a prometheus instance on AKS and it scrapes the other pods. You can view the dashboard on https://grafana-20250420112710-gxecgfanf6dwdjds.nuae.grafana.azure.com/d/eejnq0mwroflsf/learnify-dashboard?orgId=1   
+**Monitoring** is configured on Azure for the hosted app. We hosted a prometheus instance on AKS and it scrapes the other pods.  
 The file used to configure prometheus is `k8s/prometheus-cm0-configmap.yaml`
 
 ### Features
