@@ -38,7 +38,7 @@ jobs:
         docker build   -t ${{ secrets.ACR_NAME }}.azurecr.io/audio-gen:latest ./audio_gen_iep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/audio-gen:latest
 
-        docker build  -t ${{ secrets.ACR_NAME }}.azurecr.io/eep:latest ./eep
+        docker build --no-cache  -t ${{ secrets.ACR_NAME }}.azurecr.io/eep:latest ./eep
         docker push ${{ secrets.ACR_NAME }}.azurecr.io/eep:latest
 
         docker build  -t ${{ secrets.ACR_NAME }}.azurecr.io/embeddings:latest ./embeddings_iep
