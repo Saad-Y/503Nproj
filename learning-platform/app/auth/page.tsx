@@ -40,6 +40,8 @@ export default function AuthPage() {
     setIsLoading(true)
 
     try {
+      console.log("URL: ");
+      console.log(process.env.NEXT_PUBLIC_AUTH_API_URL);
       const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/login`, {
         method: "POST",
         headers: {
