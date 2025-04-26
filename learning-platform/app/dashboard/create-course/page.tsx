@@ -137,7 +137,7 @@ export default function CreateCoursePage() {
 
     try {
       // Call the API endpoint
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/generate_course`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/iep/generate_course`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
