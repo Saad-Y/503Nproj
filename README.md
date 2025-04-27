@@ -24,13 +24,16 @@ The frontend should be accessible on http://localhost:3000.
 The file used to configure prometheus is `k8s/prometheus-cm0-configmap.yaml`
 
 ### Features
-1. Document upload: you may upload documents up to 10MB. Nonparsable documents can be png, jpeg, jpg, or pdf. Parsable documents can be docx, pdf, or txt files. Longer documents need more time to be processed.
+1. Document upload: you may upload documents up to 10MB. Documents can only be pdf. Longer documents need more time to be processed. Documents that need parsing are processed as images in batches using the GPT IEP to generate summarized notes from them. Otherwise, the raw text is extracted. Then the text is embedded using the API call in embeddings_iep (text-embedding-3-large) and stored in Chroma.
 
-2. Quiz generation: generates quizzes from documents
+2. Quiz generation: generates quizzes from documents using the GPT IEP, using gpt-4o to return a multiple choice quiz in json format.
 
-3. Course suggestions: suggests courses for a topic you're interested in based on your academic level
+3. Course suggestions: suggests courses for a topic you're interested in based on your academic level, done in the course_creator IEP, uses gpt for searching the web for relevant courses from the selected platforms (e.g. Khan Academy, Coursera).
 
-4. Audio lessons: generate an audio lesson from a document.
+4. Audio lessons: generate an audio lesson from a document. Given the document's text, the audio_gen iep uses gpt-4o-mini-tts to generate an audio lesson.
+
+Note that only the external endpoint can call the internal endpoints. The architecture looks like this: 
+https://drive.google.com/file/d/1J-hXmmsdD5mJASEqyDfPwiZXGp4tqEv_/view?usp=sharing   
 
 
 ### Project Structure:
