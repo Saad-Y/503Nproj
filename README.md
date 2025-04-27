@@ -24,7 +24,7 @@ The frontend should be accessible on http://localhost:3000.
 The file used to configure prometheus is `k8s/prometheus-cm0-configmap.yaml`
 
 ### Features
-1. Document upload: you may upload documents up to 10MB. Documents can only be pdf. Longer documents need more time to be processed. Documents that need parsing are processed as images in batches using the GPT IEP to generate summarized notes from them. Otherwise, the raw text is extracted. Then the text is embedded using the API call in embeddings_iep (text-embedding-3-large) and stored in Chroma.
+1. Document upload: you may upload documents up to 10MB. Documents can only be pdf. Longer documents need more time to be processed. Documents that cannot be parsed are processed as images in batches using the GPT IEP to generate summarized notes from them. Otherwise, the raw text is extracted. Then the text is embedded using the API call in embeddings_iep (text-embedding-3-large) and stored in Chroma.
 
 2. Quiz generation: generates quizzes from documents using the GPT IEP, using gpt-4o to return a multiple choice quiz in json format.
 
